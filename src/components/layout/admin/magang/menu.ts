@@ -1,0 +1,55 @@
+import {
+  Home,
+  CalendarDays,
+  MapPin,
+  Info,
+  FileText,
+  BriefcaseBusiness,
+  SquarePen,
+  UsersRound,
+  Database,
+  BookOpen,
+  NotebookText,
+  Settings,
+  RefreshCw,
+  ClipboardList,
+  FileClock,
+} from 'lucide-react';
+
+export const menuMagangAdmin = [
+  { label: 'Dashboard', icon: Home },
+  { label: 'Periode', icon: CalendarDays },
+  { label: 'Tempat', icon: MapPin },
+  { label: 'Pengumuman', icon: Info },
+  { label: 'Surat perjalanan Dinas', icon: FileText },
+  { label: 'Kelola Peserta', icon: BriefcaseBusiness },
+  { label: 'Penilaian', icon: SquarePen },
+  {
+    label: 'Master Data User',
+    icon: UsersRound,
+    children: ['Data User', 'Data Dosen', 'Data Mahasiswa', 'Data Mentor'],
+  },
+  {
+    label: 'Dokumen',
+    icon: BookOpen,
+  },
+  {
+    label: 'Master Data',
+    icon: Database,
+    children: [
+      {
+        label: 'Data Instrumen Nilai',
+        icon: ClipboardList,
+        children: ['Penguji', 'Pemonitor', 'Mitra', 'Pembimbing'],
+      },
+      'Data Fakultas',
+      'Data Jurusan',
+      'Data Prodi',
+    ],
+  },
+  { label: 'Jurnal Harian', icon: NotebookText },
+  { label: 'Log Book Bimbingan', icon: ClipboardList },
+  { label: 'Pengaturan', icon: Settings },
+  { label: 'Sinkron User Perpus', icon: RefreshCw },
+  { label: 'Log Aktivitas', icon: FileClock },
+];
