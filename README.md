@@ -1,75 +1,53 @@
-# React + TypeScript + Vite
+# Sistem Pembelajaran Luar Kampus (SPLK)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend aplikasi Sistem Pembelajaran Luar Kampus (SPLK), sebuah platform terintegrasi untuk mendukung pengelolaan program Magang, Kuliah Kerja Nyata (KKN), dan Asistensi Mengajar (AM).
 
-Currently, two official plugins are available:
+## Teknologi yang Digunakan
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React.js
+- TypeScript
+- Vite
+- Tailwind CSS
 
-## React Compiler
+## Modul Sistem
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+SPLK mencakup beberapa modul berdasarkan program dan peran pengguna:
 
-## Expanding the ESLint configuration
+- **Mahasiswa:** Magang, KKN, dan Asistensi Mengajar (AM).
+- **Admin Magang:** Pengelolaan fitur administrasi program Magang.
+- **Admin KKN:** Dalam tahap pengembangan.
+- **Admin AM:** Dalam tahap pengembangan.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Menjalankan Project
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Pastikan Node.js dan npm sudah terinstal.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. Clone repository:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+   ```bash
+   git clone https://github.com/amelia-iky/Sistem-Pembelajaran-Luar-Kampus-.git
+   ```
 
-```
+2. Masuk ke folder project:
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+   ```bash
+   cd Sistem-Pembelajaran-Luar-Kampus-
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3. Instal dependencies:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+   ```bash
+   npm install
+   ```
 
-```
+4. Jalankan aplikasi dalam mode development:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Buka URL lokal yang ditampilkan di terminal.
+
+## Status Pengembangan
+
+Pengembangan frontend dilakukan secara bertahap untuk setiap program dan peran pengguna. Fitur yang belum selesai akan dikembangkan pada tahap berikutnya.
