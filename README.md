@@ -48,6 +48,4 @@ Pastikan Node.js dan npm sudah terinstal.
 
 5. Buka URL lokal yang ditampilkan di terminal.
 
-## Status Pengembangan
 
-Pengembangan frontend dilakukan secara bertahap untuk setiap program dan peran pengguna. Fitur yang belum selesai akan dikembangkan pada tahap berikutnya.
