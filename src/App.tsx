@@ -31,7 +31,7 @@ import JurnalKKN from './pages/KKN/mahasiswa/JurnalKKN/JurnalKKN';
 import BlogKKN from './pages/KKN/mahasiswa/BlogKKN/BlogKKN';
 import PenilaianKKN from './pages/KKN/mahasiswa/PenilaianKKN/PenilaianKKN';
 
-// MAHASISWA AM
+// MAHASISWA ASISTENSI MENGAJAR
 import DashboardAMMahasiswa from './pages/AM/mahasiswa/DashboardAM/DashboardAM';
 import TempatAM from './pages/AM/mahasiswa/TempatAM/TempatAM';
 import PendampingAM from './pages/AM/mahasiswa/PendampingAM/PendampingAM';
@@ -73,13 +73,18 @@ import DetailLogbookBimbingan from './pages/magang/Admin/LogbookBimbingan/Detail
 import Pengaturan from './pages/magang/Admin/Pengaturan/Pengaturan';
 import LogAktivitas from './pages/magang/Admin/LogAktivitas/LogAktivitas';
 
-// LAYOUT ADMIN MAGANG
+// ADMIN KKN
+import Dashboard from './pages/KKN/Admin/Dashboard/Dashboard';
+import Periode from './pages/KKN/Admin/Periode/Periode';
+import TambahPeriode from './pages/KKN/Admin/Periode/TambahPeriode';
+import DetailPeriode from './pages/KKN/Admin/Periode/DetailPeriode';
+import DetailDesa from './pages/KKN/Admin/Periode/DetailDesa/DetailDesa';
+
 function AdminMagangLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC]">
-      {/* Overlay mobile */}
       {sidebarOpen && (
         <button
           type="button"
@@ -89,18 +94,50 @@ function AdminMagangLayout() {
         />
       )}
 
-      {/* Sidebar — di mobile: fixed overlay; di desktop: bagian dari flex row */}
       <div
-        className={`shrink-0 transition-[width] duration-300 overflow-hidden ${
-          sidebarOpen ? 'w-[245px]' : 'w-0'
-        } fixed inset-y-0 left-0 z-30 lg:relative lg:inset-auto lg:z-auto`}
+        className={`fixed inset-y-0 left-0 z-30 w-[245px] shrink-0 overflow-hidden transition-transform duration-300 lg:relative lg:inset-auto lg:z-auto lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
         <SidebarAdmin isOpen={sidebarOpen} />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
+          <div className="mx-auto max-w-[1500px]">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
 
+function AdminKKNLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC]">
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label="Tutup sidebar"
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-20 cursor-default bg-slate-900/50 lg:hidden"
+        />
+      )}
+
+      <div
+        className={`fixed inset-y-0 left-0 z-30 w-[245px] shrink-0 overflow-hidden transition-transform duration-300 lg:relative lg:inset-auto lg:z-auto lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <SidebarAdmin isOpen={sidebarOpen} />
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Header onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
           <div className="mx-auto max-w-[1500px]">
             <Outlet />
@@ -114,6 +151,7 @@ function AdminMagangLayout() {
 function AppContent() {
   const location = useLocation();
   const userRole = sessionStorage.getItem('user-role');
+  const adminProgram = sessionStorage.getItem('admin-program');
   const path = location.pathname.toLowerCase();
 
   if (path === '/' || path === '/login') {
@@ -122,7 +160,17 @@ function AppContent() {
     }
 
     if (userRole === 'admin') {
-      return <Navigate to="/admin/magang/dashboard" replace />;
+      if (adminProgram === 'kkn') {
+        return <Navigate to="/admin/kkn/dashboard" replace />;
+      }
+
+      if (adminProgram === 'magang') {
+        return <Navigate to="/admin/magang/dashboard" replace />;
+      }
+
+      sessionStorage.removeItem('user-role');
+      sessionStorage.removeItem('user-email');
+      sessionStorage.removeItem('admin-program');
     }
 
     return <Login />;
@@ -136,27 +184,68 @@ function AppContent() {
     return userRole === 'mahasiswa' ? (
       <PendaftaranProgram />
     ) : (
-      <Navigate to="/admin/magang/dashboard" replace />
+      <Navigate
+        to={
+          adminProgram === 'kkn'
+            ? '/admin/kkn/dashboard'
+            : '/admin/magang/dashboard'
+        }
+        replace
+      />
     );
   }
 
-  // ROUTE ADMIN
   if (path.startsWith('/admin')) {
     if (userRole !== 'admin') {
       return <Navigate to="/pendaftaran-program" replace />;
+    }
+
+    if (adminProgram === 'kkn' && !path.startsWith('/admin/kkn')) {
+      return <Navigate to="/admin/kkn/dashboard" replace />;
+    }
+
+    if (adminProgram === 'magang' && !path.startsWith('/admin/magang')) {
+      return <Navigate to="/admin/magang/dashboard" replace />;
+    }
+
+    if (adminProgram !== 'magang' && adminProgram !== 'kkn') {
+      sessionStorage.removeItem('user-role');
+      sessionStorage.removeItem('user-email');
+      sessionStorage.removeItem('admin-program');
+      return <Navigate to="/login" replace />;
     }
 
     return (
       <Routes>
         <Route
           path="/admin"
-          element={<Navigate to="/admin/magang/dashboard" replace />}
-        />
-        <Route
-          path="/admin/dashboard"
-          element={<Navigate to="/admin/magang/dashboard" replace />}
+          element={
+            <Navigate
+              to={
+                adminProgram === 'kkn'
+                  ? '/admin/kkn/dashboard'
+                  : '/admin/magang/dashboard'
+              }
+              replace
+            />
+          }
         />
 
+        <Route
+          path="/admin/dashboard"
+          element={
+            <Navigate
+              to={
+                adminProgram === 'kkn'
+                  ? '/admin/kkn/dashboard'
+                  : '/admin/magang/dashboard'
+              }
+              replace
+            />
+          }
+        />
+
+        {/* ADMIN MAGANG */}
         <Route path="/admin/magang" element={<AdminMagangLayout />}>
           <Route
             index
@@ -170,13 +259,11 @@ function AppContent() {
           <Route path="manajemen" element={<ManajemenMagangAdmin />} />
           <Route path="set-mahasiswa" element={<SetMahasiswa />} />
           <Route path="penilaian" element={<PenilaianMagangAdmin />} />
-
           <Route path="data-user" element={<DataUser />} />
           <Route path="data-dosen" element={<DataDosen />} />
           <Route path="data-mahasiswa" element={<DataMahasiswa />} />
           <Route path="data-mentor" element={<DataMentor />} />
           <Route path="surat" element={<Surat />} />
-
           <Route path="data-instrumen-nilai/penguji" element={<Penguji />} />
           <Route
             path="data-instrumen-nilai/pemonitor"
@@ -187,46 +274,79 @@ function AppContent() {
             path="data-instrumen-nilai/pembimbing"
             element={<Pembimbing />}
           />
-
           <Route path="data-fakultas" element={<DataFakultas />} />
           <Route path="data-jurusan" element={<DataJurusan />} />
           <Route path="data-prodi" element={<DataProdi />} />
-
           <Route path="jurnal-harian" element={<JurnalHarian />} />
           <Route path="jurnal-harian/:nim" element={<DetailJurnal />} />
-
           <Route path="logbook-bimbingan" element={<LogbookBimbingan />} />
           <Route
             path="logbook-bimbingan/:nim"
             element={<DetailLogbookBimbingan />}
           />
-
           <Route path="pengaturan" element={<Pengaturan />} />
           <Route path="log-aktivitas" element={<LogAktivitas />} />
-
           <Route
             path="*"
             element={<Navigate to="/admin/magang/dashboard" replace />}
           />
         </Route>
 
+        {/* ADMIN KKN */}
+        <Route path="/admin/kkn" element={<AdminKKNLayout />}>
+          <Route
+            index
+            element={<Navigate to="/admin/kkn/dashboard" replace />}
+          />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="periode" element={<Periode />} />
+          <Route path="periode/tambah" element={<TambahPeriode />} />
+          <Route path="periode/:id/desa/:desaId" element={<DetailDesa />} />
+          <Route path="periode/:id" element={<DetailPeriode />} />
+          <Route
+            path="*"
+            element={<Navigate to="/admin/kkn/dashboard" replace />}
+          />
+        </Route>
+
         <Route
           path="*"
-          element={<Navigate to="/admin/magang/dashboard" replace />}
+          element={
+            <Navigate
+              to={
+                adminProgram === 'kkn'
+                  ? '/admin/kkn/dashboard'
+                  : '/admin/magang/dashboard'
+              }
+              replace
+            />
+          }
         />
       </Routes>
     );
   }
 
-  // ROUTE MAHASISWA
   if (
+    userRole === 'admin' &&
     (path.startsWith('/magang/') ||
       path.startsWith('/kkn/') ||
       path.startsWith('/am/') ||
-      path === '/profil') &&
-    userRole !== 'mahasiswa'
+      path === '/profil')
   ) {
-    return <Navigate to="/admin/magang/dashboard" replace />;
+    return (
+      <Navigate
+        to={
+          adminProgram === 'kkn'
+            ? '/admin/kkn/dashboard'
+            : '/admin/magang/dashboard'
+        }
+        replace
+      />
+    );
+  }
+
+  if (userRole !== 'mahasiswa') {
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -235,7 +355,6 @@ function AppContent() {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header onToggleSidebar={() => {}} />
-
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
           <div className="mx-auto max-w-[1500px]">
             <Routes>
@@ -321,7 +440,6 @@ function AppContent() {
 
               {/* HALAMAN UMUM MAHASISWA */}
               <Route path="/profil" element={<Profil />} />
-
               <Route
                 path="*"
                 element={
