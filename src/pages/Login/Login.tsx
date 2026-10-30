@@ -16,27 +16,39 @@ export default function Login() {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Login mahasiswa
+    // LOGIN MAHASISWA
     if (
       normalizedEmail === 'mahasiswa@undiksha.ac.id' &&
       password === 'mahasiswa123'
     ) {
       sessionStorage.setItem('user-role', 'mahasiswa');
       sessionStorage.setItem('user-email', normalizedEmail);
-
       sessionStorage.removeItem('admin-program');
 
       navigate('/pendaftaran-program');
       return;
     }
 
-    // Login Admin Magang
+    // LOGIN ADMIN MAGANG
     if (normalizedEmail === 'admin@undiksha.ac.id' && password === 'admin123') {
       sessionStorage.setItem('user-role', 'admin');
       sessionStorage.setItem('user-email', normalizedEmail);
       sessionStorage.setItem('admin-program', 'magang');
 
       navigate('/admin/magang/dashboard');
+      return;
+    }
+
+    // LOGIN ADMIN KKN
+    if (
+      normalizedEmail === 'adminkkn@undiksha.ac.id' &&
+      password === 'kkn123'
+    ) {
+      sessionStorage.setItem('user-role', 'admin');
+      sessionStorage.setItem('user-email', normalizedEmail);
+      sessionStorage.setItem('admin-program', 'kkn');
+
+      navigate('/admin/kkn/dashboard');
       return;
     }
 
@@ -49,7 +61,7 @@ export default function Login() {
       style={{ backgroundColor: '#EBF3FF' }}
     >
       <section
-        className="flex w-full overflow-hidden"
+        className="flex w-full overflow-hidden max-md:flex-col"
         style={{
           maxWidth: '1150px',
           minHeight: '675px',
@@ -59,7 +71,7 @@ export default function Login() {
       >
         {/* KOLOM KIRI */}
         <aside
-          className="flex w-1/2 flex-col items-center px-11 py-10 text-white"
+          className="flex w-1/2 flex-col items-center px-11 py-10 text-white max-md:w-full max-md:px-6"
           style={{ backgroundColor: '#245AA5' }}
         >
           <div className="mb-6 flex justify-center">
@@ -119,7 +131,7 @@ export default function Login() {
         </aside>
 
         {/* KOLOM KANAN */}
-        <section className="flex w-1/2 items-center justify-center bg-white px-10 py-10">
+        <section className="flex w-1/2 items-center justify-center bg-white px-10 py-10 max-md:w-full max-md:px-6">
           <div className="w-full" style={{ maxWidth: '400px' }}>
             <div className="mb-6 flex justify-center">
               <img
@@ -148,6 +160,7 @@ export default function Login() {
               Silakan masukkan kredensial Anda
             </p>
 
+            {/* PESAN ERROR */}
             {error && (
               <div
                 role="alert"

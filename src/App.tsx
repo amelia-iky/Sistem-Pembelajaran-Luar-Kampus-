@@ -6,6 +6,7 @@ import {
   useLocation,
   Navigate,
   Outlet,
+  useOutletContext,
 } from 'react-router-dom';
 
 import Sidebar from './components/layout/sidebar';
@@ -31,7 +32,7 @@ import JurnalKKN from './pages/KKN/mahasiswa/JurnalKKN/JurnalKKN';
 import BlogKKN from './pages/KKN/mahasiswa/BlogKKN/BlogKKN';
 import PenilaianKKN from './pages/KKN/mahasiswa/PenilaianKKN/PenilaianKKN';
 
-// MAHASISWA AM
+// MAHASISWA ASISTENSI MENGAJAR
 import DashboardAMMahasiswa from './pages/AM/mahasiswa/DashboardAM/DashboardAM';
 import TempatAM from './pages/AM/mahasiswa/TempatAM/TempatAM';
 import PendampingAM from './pages/AM/mahasiswa/PendampingAM/PendampingAM';
@@ -73,13 +74,99 @@ import DetailLogbookBimbingan from './pages/magang/Admin/LogbookBimbingan/Detail
 import Pengaturan from './pages/magang/Admin/Pengaturan/Pengaturan';
 import LogAktivitas from './pages/magang/Admin/LogAktivitas/LogAktivitas';
 
+// ADMIN KKN
+import Dashboard from './pages/KKN/Admin/Dashboard/Dashboard';
+import Periode from './pages/KKN/Admin/Periode/Periode';
+import TambahPeriode from './pages/KKN/Admin/Periode/TambahPeriode';
+import DetailPeriode from './pages/KKN/Admin/Periode/DetailPeriode';
+import LayoutDesa from './pages/KKN/Admin/Periode/DetailDesa/LayoutDesa';
+import DetailDesa from './pages/KKN/Admin/Periode/DetailDesa/DetailDesa';
+import Pemetaanprodi from './pages/KKN/Admin/Periode/DetailDesa/Pemetaanprodi';
+import Peserta from './pages/KKN/Admin/Periode/DetailDesa/Peserta';
+import Blog from './pages/KKN/Admin/Periode/DetailDesa/Blog';
+import DokumenKelompokDesa from './pages/KKN/Admin/Periode/DetailDesa/DokumenKelompok';
+import BuktiKunjungan from './pages/KKN/Admin/Periode/DetailDesa/BuktiKunjungan';
+import Nilai from './pages/KKN/Admin/Periode/DetailDesa/Nilai';
+import type { DesaRouteContext } from './pages/KKN/Admin/Periode/DetailDesa/DesaContext';
+
+// ROUTE PENDUKUNG HALAMAN DESA
+function PemetaanProdiRoute() {
+  const context = useOutletContext<DesaRouteContext>();
+
+  return (
+    <Pemetaanprodi
+      periodeId={context.periodeId}
+      desaId={context.desaId}
+      namaDesa={context.namaDesa}
+    />
+  );
+}
+
+function PesertaRoute() {
+  const context = useOutletContext<DesaRouteContext>();
+
+  return (
+    <Peserta
+      periodeId={context.periodeId}
+      desaId={context.desaId}
+      namaDesa={context.namaDesa}
+    />
+  );
+}
+
+function BlogRoute() {
+  const context = useOutletContext<DesaRouteContext>();
+
+  return (
+    <Blog
+      periodeId={context.periodeId}
+      desaId={context.desaId}
+      namaDesa={context.namaDesa}
+    />
+  );
+}
+
+// ROUTE DOKUMEN KELOMPOK
+function DokumenKelompokDesaRoute() {
+  const c = useOutletContext<DesaRouteContext>();
+
+  return (
+    <DokumenKelompokDesa
+      periodeId={c.periodeId}
+      desaId={c.desaId}
+      namaDesa={c.namaDesa}
+    />
+  );
+}
+
+// ROUTE BUKTI KUNJUNGAN
+function BuktiKunjunganRoute() {
+  const c = useOutletContext<DesaRouteContext>();
+
+  return (
+    <BuktiKunjungan
+      periodeId={c.periodeId}
+      desaId={c.desaId}
+      namaDesa={c.namaDesa}
+    />
+  );
+}
+
+// ROUTE NILAI MAHASISWA
+function NilaiRoute() {
+  const c = useOutletContext<DesaRouteContext>();
+
+  return (
+    <Nilai periodeId={c.periodeId} desaId={c.desaId} namaDesa={c.namaDesa} />
+  );
+}
+
 // LAYOUT ADMIN MAGANG
 function AdminMagangLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC]">
-      {/* Overlay mobile */}
       {sidebarOpen && (
         <button
           type="button"
@@ -89,13 +176,12 @@ function AdminMagangLayout() {
         />
       )}
 
-      {/* Sidebar — di mobile: fixed overlay; di desktop: bagian dari flex row */}
       <div
-        className={`shrink-0 transition-[width] duration-300 overflow-hidden ${
-          sidebarOpen ? 'w-[245px]' : 'w-0'
-        } fixed inset-y-0 left-0 z-30 lg:relative lg:inset-auto lg:z-auto`}
+        className={`fixed inset-y-0 left-0 z-30 w-[245px] shrink-0 overflow-hidden transition-transform duration-300 lg:relative lg:inset-auto lg:z-auto lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
-        <SidebarAdmin isOpen={sidebarOpen} />
+        <SidebarAdmin isOpen={sidebarOpen} program="magang" />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -111,9 +197,47 @@ function AdminMagangLayout() {
   );
 }
 
+// LAYOUT ADMIN KKN
+function AdminKKNLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC]">
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label="Tutup sidebar"
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-20 cursor-default bg-slate-900/50 lg:hidden"
+        />
+      )}
+
+      <div
+        className={`fixed inset-y-0 left-0 z-30 w-[245px] shrink-0 overflow-hidden transition-transform duration-300 lg:relative lg:inset-auto lg:z-auto lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <SidebarAdmin isOpen={sidebarOpen} program="kkn" />
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Header onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+
+        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
+          <div className="mx-auto max-w-[1500px]">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// KONTROL AKSES DAN ROUTING
 function AppContent() {
   const location = useLocation();
   const userRole = sessionStorage.getItem('user-role');
+  const adminProgram = sessionStorage.getItem('admin-program');
   const path = location.pathname.toLowerCase();
 
   if (path === '/' || path === '/login') {
@@ -122,7 +246,17 @@ function AppContent() {
     }
 
     if (userRole === 'admin') {
-      return <Navigate to="/admin/magang/dashboard" replace />;
+      if (adminProgram === 'kkn') {
+        return <Navigate to="/admin/kkn/dashboard" replace />;
+      }
+
+      if (adminProgram === 'magang') {
+        return <Navigate to="/admin/magang/dashboard" replace />;
+      }
+
+      sessionStorage.removeItem('user-role');
+      sessionStorage.removeItem('user-email');
+      sessionStorage.removeItem('admin-program');
     }
 
     return <Login />;
@@ -136,32 +270,75 @@ function AppContent() {
     return userRole === 'mahasiswa' ? (
       <PendaftaranProgram />
     ) : (
-      <Navigate to="/admin/magang/dashboard" replace />
+      <Navigate
+        to={
+          adminProgram === 'kkn'
+            ? '/admin/kkn/dashboard'
+            : '/admin/magang/dashboard'
+        }
+        replace
+      />
     );
   }
 
-  // ROUTE ADMIN
   if (path.startsWith('/admin')) {
     if (userRole !== 'admin') {
       return <Navigate to="/pendaftaran-program" replace />;
+    }
+
+    if (adminProgram === 'kkn' && !path.startsWith('/admin/kkn')) {
+      return <Navigate to="/admin/kkn/dashboard" replace />;
+    }
+
+    if (adminProgram === 'magang' && !path.startsWith('/admin/magang')) {
+      return <Navigate to="/admin/magang/dashboard" replace />;
+    }
+
+    if (adminProgram !== 'magang' && adminProgram !== 'kkn') {
+      sessionStorage.removeItem('user-role');
+      sessionStorage.removeItem('user-email');
+      sessionStorage.removeItem('admin-program');
+
+      return <Navigate to="/login" replace />;
     }
 
     return (
       <Routes>
         <Route
           path="/admin"
-          element={<Navigate to="/admin/magang/dashboard" replace />}
-        />
-        <Route
-          path="/admin/dashboard"
-          element={<Navigate to="/admin/magang/dashboard" replace />}
+          element={
+            <Navigate
+              to={
+                adminProgram === 'kkn'
+                  ? '/admin/kkn/dashboard'
+                  : '/admin/magang/dashboard'
+              }
+              replace
+            />
+          }
         />
 
+        <Route
+          path="/admin/dashboard"
+          element={
+            <Navigate
+              to={
+                adminProgram === 'kkn'
+                  ? '/admin/kkn/dashboard'
+                  : '/admin/magang/dashboard'
+              }
+              replace
+            />
+          }
+        />
+
+        {/* ADMIN MAGANG */}
         <Route path="/admin/magang" element={<AdminMagangLayout />}>
           <Route
             index
             element={<Navigate to="/admin/magang/dashboard" replace />}
           />
+
           <Route path="dashboard" element={<DashboardAdminMagang />} />
           <Route path="periode" element={<PeriodeMagangAdmin />} />
           <Route path="tempat-magang" element={<TempatMagangAdmin />} />
@@ -170,7 +347,6 @@ function AppContent() {
           <Route path="manajemen" element={<ManajemenMagangAdmin />} />
           <Route path="set-mahasiswa" element={<SetMahasiswa />} />
           <Route path="penilaian" element={<PenilaianMagangAdmin />} />
-
           <Route path="data-user" element={<DataUser />} />
           <Route path="data-dosen" element={<DataDosen />} />
           <Route path="data-mahasiswa" element={<DataMahasiswa />} />
@@ -178,11 +354,14 @@ function AppContent() {
           <Route path="surat" element={<Surat />} />
 
           <Route path="data-instrumen-nilai/penguji" element={<Penguji />} />
+
           <Route
             path="data-instrumen-nilai/pemonitor"
             element={<Pemonitor />}
           />
+
           <Route path="data-instrumen-nilai/mitra" element={<Mitra />} />
+
           <Route
             path="data-instrumen-nilai/pembimbing"
             element={<Pembimbing />}
@@ -191,16 +370,13 @@ function AppContent() {
           <Route path="data-fakultas" element={<DataFakultas />} />
           <Route path="data-jurusan" element={<DataJurusan />} />
           <Route path="data-prodi" element={<DataProdi />} />
-
           <Route path="jurnal-harian" element={<JurnalHarian />} />
           <Route path="jurnal-harian/:nim" element={<DetailJurnal />} />
-
           <Route path="logbook-bimbingan" element={<LogbookBimbingan />} />
           <Route
             path="logbook-bimbingan/:nim"
             element={<DetailLogbookBimbingan />}
           />
-
           <Route path="pengaturan" element={<Pengaturan />} />
           <Route path="log-aktivitas" element={<LogAktivitas />} />
 
@@ -210,23 +386,79 @@ function AppContent() {
           />
         </Route>
 
+        {/* ADMIN KKN */}
+        <Route path="/admin/kkn" element={<AdminKKNLayout />}>
+          <Route
+            index
+            element={<Navigate to="/admin/kkn/dashboard" replace />}
+          />
+
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="periode" element={<Periode />} />
+          <Route path="periode/tambah" element={<TambahPeriode />} />
+          <Route path="periode/:id" element={<DetailPeriode />} />
+
+          {/* DETAIL DESA DAN SUBHALAMANNYA */}
+          <Route path="periode/:id/desa/:desaId" element={<LayoutDesa />}>
+            <Route index element={<DetailDesa />} />
+            <Route path="pemetaan-prodi" element={<PemetaanProdiRoute />} />
+            <Route path="peserta" element={<PesertaRoute />} />
+            <Route path="blog" element={<BlogRoute />} />
+
+            <Route
+              path="dokumen-kelompok"
+              element={<DokumenKelompokDesaRoute />}
+            />
+
+            <Route path="bukti-kunjungan" element={<BuktiKunjunganRoute />} />
+
+            <Route path="nilai" element={<NilaiRoute />} />
+          </Route>
+
+          <Route
+            path="*"
+            element={<Navigate to="/admin/kkn/dashboard" replace />}
+          />
+        </Route>
+
         <Route
           path="*"
-          element={<Navigate to="/admin/magang/dashboard" replace />}
+          element={
+            <Navigate
+              to={
+                adminProgram === 'kkn'
+                  ? '/admin/kkn/dashboard'
+                  : '/admin/magang/dashboard'
+              }
+              replace
+            />
+          }
         />
       </Routes>
     );
   }
 
-  // ROUTE MAHASISWA
   if (
+    userRole === 'admin' &&
     (path.startsWith('/magang/') ||
       path.startsWith('/kkn/') ||
       path.startsWith('/am/') ||
-      path === '/profil') &&
-    userRole !== 'mahasiswa'
+      path === '/profil')
   ) {
-    return <Navigate to="/admin/magang/dashboard" replace />;
+    return (
+      <Navigate
+        to={
+          adminProgram === 'kkn'
+            ? '/admin/kkn/dashboard'
+            : '/admin/magang/dashboard'
+        }
+        replace
+      />
+    );
+  }
+
+  if (userRole !== 'mahasiswa') {
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -244,22 +476,27 @@ function AppContent() {
                 path="/magang/mahasiswa"
                 element={<Navigate to="/magang/mahasiswa/dashboard" replace />}
               />
+
               <Route
                 path="/magang/mahasiswa/dashboard"
                 element={<DashboardMagangMahasiswa />}
               />
+
               <Route
                 path="/magang/mahasiswa/tempat-magang"
                 element={<TempatMagangMahasiswa />}
               />
+
               <Route
                 path="/magang/mahasiswa/pendamping-magang"
                 element={<PendampingMagang />}
               />
+
               <Route
                 path="/magang/mahasiswa/dokumen-magang"
                 element={<DokumenMagang />}
               />
+
               <Route
                 path="/magang/mahasiswa/jurnal"
                 element={<JurnalMagang />}
@@ -270,21 +507,28 @@ function AppContent() {
                 path="/kkn/mahasiswa"
                 element={<Navigate to="/kkn/mahasiswa/dashboard" replace />}
               />
+
               <Route
                 path="/kkn/mahasiswa/dashboard"
                 element={<DashboardKKNMahasiswa />}
               />
+
               <Route path="/kkn/mahasiswa/tempat-kkn" element={<TempatKKN />} />
+
               <Route
                 path="/kkn/mahasiswa/pendamping-kkn"
                 element={<PendampingKKN />}
               />
+
               <Route
                 path="/kkn/mahasiswa/dokumen-kkn"
                 element={<DokumenKKN />}
               />
+
               <Route path="/kkn/mahasiswa/jurnal" element={<JurnalKKN />} />
+
               <Route path="/kkn/mahasiswa/blog" element={<BlogKKN />} />
+
               <Route
                 path="/kkn/mahasiswa/penilaian"
                 element={<PenilaianKKN />}
@@ -295,25 +539,33 @@ function AppContent() {
                 path="/am/mahasiswa"
                 element={<Navigate to="/am/mahasiswa/dashboard" replace />}
               />
+
               <Route
                 path="/am/mahasiswa/dashboard"
                 element={<DashboardAMMahasiswa />}
               />
+
               <Route path="/am/mahasiswa/tempat" element={<TempatAM />} />
+
               <Route
                 path="/am/mahasiswa/pendamping"
                 element={<PendampingAM />}
               />
+
               <Route path="/am/mahasiswa/dokumen" element={<DokumenAM />} />
+
               <Route
                 path="/am/mahasiswa/unduh-instrumen"
                 element={<UnduhInstrumenAM />}
               />
+
               <Route path="/am/mahasiswa/jurnal" element={<JurnalHarianAM />} />
+
               <Route
                 path="/am/mahasiswa/link-vicon"
                 element={<LinkViconAM />}
               />
+
               <Route
                 path="/am/mahasiswa/ruang-kolaboratif"
                 element={<RuangKolaboratifAM />}

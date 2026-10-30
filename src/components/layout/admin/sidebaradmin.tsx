@@ -2,10 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserRound, ChevronDown, ChevronRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+
 import { menuMagangAdmin } from './magang/menu';
+import { menuKKNAdmin } from './KKN/menu';
 
 interface SidebarAdminProps {
   isOpen?: boolean;
+  program?: 'magang' | 'kkn';
   activeMenu?: string;
   onMenuChange?: (menu: string) => void;
 }
@@ -16,9 +19,7 @@ type MenuItem = {
   children?: (string | MenuItem)[];
 };
 
-const menuItems = menuMagangAdmin as MenuItem[];
-
-const menuPaths: Record<string, string> = {
+const menuPathsMagang: Record<string, string> = {
   Dashboard: '/admin/magang/dashboard',
   Periode: '/admin/magang/periode',
   Tempat: '/admin/magang/tempat-magang',
@@ -26,45 +27,57 @@ const menuPaths: Record<string, string> = {
   'Surat perjalanan Dinas': '/admin/magang/spd',
   'Kelola Peserta': '/admin/magang/manajemen',
   Penilaian: '/admin/magang/penilaian',
-
   'Data User': '/admin/magang/data-user',
   'Data Dosen': '/admin/magang/data-dosen',
   'Data Mahasiswa': '/admin/magang/data-mahasiswa',
   'Data Mentor': '/admin/magang/data-mentor',
-
+  Dokumen: '/admin/magang/surat',
   Penguji: '/admin/magang/data-instrumen-nilai/penguji',
   Pemonitor: '/admin/magang/data-instrumen-nilai/pemonitor',
   Mitra: '/admin/magang/data-instrumen-nilai/mitra',
   Pembimbing: '/admin/magang/data-instrumen-nilai/pembimbing',
-
   'Data Fakultas': '/admin/magang/data-fakultas',
   'Data Jurusan': '/admin/magang/data-jurusan',
   'Data Prodi': '/admin/magang/data-prodi',
-
-  Dokumen: '/admin/magang/surat',
   'Jurnal Harian': '/admin/magang/jurnal-harian',
   'Log Book Bimbingan': '/admin/magang/logbook-bimbingan',
   Pengaturan: '/admin/magang/pengaturan',
-  'Sinkron User Perpus': '/admin/magang/set-mahasiswa',
   'Log Aktivitas': '/admin/magang/log-aktivitas',
+};
+
+const menuPathsKKN: Record<string, string> = {
+  Dashboard: '/admin/kkn/dashboard',
+  Periode: '/admin/kkn/periode',
+  'Lokasi KKN': '/admin/kkn/lokasi-kkn',
+  'Kelompok KKN': '/admin/kkn/kelompok',
+  'Dosen Pembimbing': '/admin/kkn/data-dosen',
+  Penilaian: '/admin/kkn/penilaian',
+  'Dokumen KKN': '/admin/kkn/dokumen',
+  'Log Aktivitas': '/admin/kkn/log-aktivitas',
 };
 
 export default function SidebarAdmin({
   isOpen = true,
-  activeMenu = 'Dashboard',
+  program = 'magang',
+  activeMenu,
   onMenuChange,
 }: SidebarAdminProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const menuScrollRef = useRef<HTMLElement>(null);
-
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+
+  const menuItems = (
+    program === 'kkn' ? menuKKNAdmin : menuMagangAdmin
+  ) as MenuItem[];
+
+  const menuPaths = program === 'kkn' ? menuPathsKKN : menuPathsMagang;
 
   useEffect(() => {
     if (menuScrollRef.current) {
       menuScrollRef.current.scrollTop = 0;
     }
-  }, []);
+  }, [program]);
 
   const toggleMenu = (label: string) => {
     setExpandedMenus((current) =>
@@ -86,17 +99,22 @@ export default function SidebarAdmin({
 
   const isMenuActive = (label: string) => {
     const path = menuPaths[label];
-    if (path === undefined) return false;
-    return location.pathname === path;
+
+    if (!path) return false;
+
+    return (
+      location.pathname === path || location.pathname.startsWith(`${path}/`)
+    );
   };
 
   const isAncestorActive = (item: MenuItem): boolean => {
     if (!item.children) return false;
+
     return item.children.some((child) => {
       if (typeof child === 'string') {
-        const childPath = menuPaths[child];
-        return childPath !== undefined && location.pathname === childPath;
+        return isMenuActive(child);
       }
+
       return isMenuActive(child.label) || isAncestorActive(child);
     });
   };
@@ -110,7 +128,7 @@ export default function SidebarAdmin({
       const isActive = isMenuActive(item.label) || isAncestorActive(item);
 
       return (
-        <div key={item.label}>
+        <div key={`${program}-${item.label}`}>
           <button
             type="button"
             title={!isOpen ? item.label : undefined}
@@ -125,7 +143,7 @@ export default function SidebarAdmin({
               !isOpen ? 'justify-center' : ''
             } ${
               isActive
-                ? 'bg-[#7297C6] font-medium text-white shadow-xs'
+                ? 'bg-[#7297C6] font-medium text-white shadow-sm'
                 : 'font-normal text-white hover:bg-white/10'
             }`}
             style={
@@ -156,12 +174,11 @@ export default function SidebarAdmin({
                 if (typeof child === 'string') {
                   return (
                     <button
-                      key={child}
+                      key={`${item.label}-${child}`}
                       type="button"
                       onClick={() => openMenu(child)}
                       className={`flex min-h-[38px] w-full items-center gap-3 rounded-lg py-2 pr-2 text-left text-xs transition-colors ${
-                        activeMenu === child ||
-                        location.pathname === menuPaths[child]
+                        activeMenu === child || isMenuActive(child)
                           ? 'bg-[#7297C6] font-medium text-white'
                           : 'text-white/80 hover:bg-white/10 hover:text-white'
                       }`}
@@ -182,6 +199,10 @@ export default function SidebarAdmin({
         </div>
       );
     });
+
+  const dashboardItems = menuItems.filter((item) => item.label === 'Dashboard');
+
+  const otherItems = menuItems.filter((item) => item.label !== 'Dashboard');
 
   return (
     <aside
@@ -221,6 +242,7 @@ export default function SidebarAdmin({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover"
         />
+
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[#093060]/20" />
 
         <div
@@ -235,7 +257,7 @@ export default function SidebarAdmin({
           {isOpen && (
             <div className="min-w-0">
               <p className="truncate text-xs font-bold text-white">
-                Admin Magang
+                {program === 'kkn' ? 'Admin KKN' : 'Admin Magang'}
               </p>
               <p className="truncate text-[11px] text-blue-200">
                 Administrator
@@ -250,39 +272,15 @@ export default function SidebarAdmin({
         ref={menuScrollRef}
         className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-3 pb-4 pt-2"
       >
-        {/* Dashboard — tanpa judul grup */}
-        <div className="space-y-1.5">
-          {renderMenu(menuItems.slice(0, 1))}
-        </div>
+        <div className="space-y-1.5">{renderMenu(dashboardItems)}</div>
 
-        {/* MANAJEMEN MAGANG */}
         <div className="mt-4 space-y-1.5">
           {isOpen && (
             <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-              Manajemen Magang
+              {program === 'kkn' ? 'Manajemen KKN' : 'Manajemen Magang'}
             </p>
           )}
-          {renderMenu(menuItems.slice(1, 7))}
-        </div>
-
-        {/* MASTER DATA */}
-        <div className="mt-4 space-y-1.5">
-          {isOpen && (
-            <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-              Master Data
-            </p>
-          )}
-          {renderMenu(menuItems.slice(7, 10))}
-        </div>
-
-        {/* MENU LAINNYA */}
-        <div className="mt-4 space-y-1.5">
-          {isOpen && (
-            <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-              Menu Lainnya
-            </p>
-          )}
-          {renderMenu(menuItems.slice(10))}
+          {renderMenu(otherItems)}
         </div>
       </nav>
     </aside>
