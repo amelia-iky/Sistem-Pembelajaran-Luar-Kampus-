@@ -149,6 +149,33 @@ export default function TambahPeriode() {
       detail: {
         ...form,
         agenda,
+        daftarDesa: [
+          {
+            id: Date.now(),
+            nama: form.desa,
+            namaDesa: form.desa,
+            kecamatan: form.kecamatan,
+            kabupaten: form.kabupaten,
+            pembimbing: '',
+            dosenPembimbing: '',
+            nipPembimbing: '',
+            fakultasPembimbing: '',
+            penguji: '',
+            penguji1: '',
+            nipPenguji1: '',
+            penguji2: '',
+            nipPenguji2: '',
+            koordinator: '',
+            koordinatorDesa: '',
+            kepalaDesa: '',
+            telepon: '',
+            alamat: '',
+            klaster: '',
+            peserta: 0,
+            jumlahBlog: 0,
+            status: 'Belum Ditugaskan',
+          },
+        ],
       },
     };
 

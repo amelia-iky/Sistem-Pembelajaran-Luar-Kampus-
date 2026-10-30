@@ -1,423 +1,392 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, type FormEvent } from 'react';
 import {
   MapPin,
-  Users,
-  FileText,
-  ChevronLeft,
-  BookOpen,
-  GraduationCap,
-  PencilLine,
-  Trash2,
   UserCheck,
-  LayoutGrid,
-  ClipboardList,
-  CalendarDays,
+  GraduationCap,
+  Users,
+  PencilLine,
+  Check,
+  X,
 } from 'lucide-react';
-import { STORAGE_KEY, type PeriodeKKNData } from '../Periode';
 
-type DesaKKN = {
-  id: string | number;
-  nama?: string;
-  namaDesa?: string;
-  kecamatan?: string;
-  kabupaten?: string;
-  pembimbing?: string;
-  dosenPembimbing?: string;
-  penguji?: string;
-  penguji1?: string;
-  penguji2?: string;
-  koordinator?: string;
-  koordinatorDesa?: string;
-  status?: string;
-  alamat?: string;
-  kepalaDesa?: string;
-  telepon?: string;
-  klaster?: string;
-  nipPembimbing?: string;
-  fakultasPembimbing?: string;
-  peserta?: number | string;
-  jumlahPeserta?: number | string;
-  jumlahBlog?: number | string;
+import { STORAGE_KEY } from '../Periode';
+import { useDesaContext } from './DesaContext';
+import type { DesaRecord, PeriodeDesa } from './DesaContext';
+
+const val = (value: unknown): string => {
+  if (value === undefined || value === null || value === '') {
+    return '-';
+  }
+
+  return String(value);
 };
 
-function nilai(value: unknown) {
-  if (value === undefined || value === null || value === '') return '-';
-  return String(value);
-}
-
-function bacaPeriode(id: number): PeriodeKKNData | null {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const data: unknown = saved ? JSON.parse(saved) : [];
-    if (!Array.isArray(data)) return null;
-    return (data as PeriodeKKNData[]).find((item) => item.id === id) ?? null;
-  } catch {
-    return null;
-  }
-}
+type FormDesa = Record<string, string>;
 
 export default function DetailDesa() {
-  const navigate = useNavigate();
-  const { id, desaId } = useParams();
-  const periodeId = Number(id);
-  const [periode] = useState<PeriodeKKNData | null>(() =>
-    Number.isFinite(periodeId) ? bacaPeriode(periodeId) : null,
-  );
-  const desaTerpilih = (() => {
-    if (!periode) return null;
-    const rows = periode.detail?.daftarDesa;
-    if (Array.isArray(rows)) {
-      const row = (rows as Array<Record<string, unknown>>).find(
-        (item, index) => String(item.id ?? index + 1) === String(desaId),
-      );
-      if (row) {
-        return {
-          id: (row.id as string | number | undefined) ?? desaId ?? '',
-          nama: String(row.nama ?? row.namaDesa ?? row.desa ?? 'Desa'),
-          kecamatan: row.kecamatan ? String(row.kecamatan) : undefined,
-          kabupaten: row.kabupaten ? String(row.kabupaten) : undefined,
-          pembimbing: row.pembimbing
-            ? String(row.pembimbing)
-            : row.dosenPembimbing
-              ? String(row.dosenPembimbing)
-              : undefined,
-          dosenPembimbing: row.dosenPembimbing
-            ? String(row.dosenPembimbing)
-            : undefined,
-          penguji: row.penguji ? String(row.penguji) : undefined,
-          penguji1: row.penguji1 ? String(row.penguji1) : undefined,
-          penguji2: row.penguji2 ? String(row.penguji2) : undefined,
-          koordinator: row.koordinator ? String(row.koordinator) : undefined,
-          koordinatorDesa: row.koordinatorDesa
-            ? String(row.koordinatorDesa)
-            : undefined,
-          status: row.status ? String(row.status) : 'Aktif Ditugaskan',
-          alamat: row.alamat ? String(row.alamat) : undefined,
-          kepalaDesa: row.kepalaDesa ? String(row.kepalaDesa) : undefined,
-          telepon: row.telepon ? String(row.telepon) : undefined,
-          klaster: row.klaster ? String(row.klaster) : undefined,
-          nipPembimbing: row.nipPembimbing
-            ? String(row.nipPembimbing)
-            : undefined,
-          fakultasPembimbing: row.fakultasPembimbing
-            ? String(row.fakultasPembimbing)
-            : undefined,
-          peserta: (row.peserta ?? row.jumlahPeserta) as
-            | number
-            | string
-            | undefined,
-          jumlahBlog: row.jumlahBlog as number | string | undefined,
-        } satisfies DesaKKN;
-      }
-    }
-    if (String(periode.id) === String(desaId) && periode.desa) {
-      return {
-        id: periode.id,
-        nama: periode.desa,
-        kecamatan: periode.kecamatan,
-        kabupaten: periode.kabupaten,
-        status: periode.status,
-      } satisfies DesaKKN;
-    }
-    return null;
-  })();
-  const [menuLokalDesa, setMenuLokalDesa] = useState('Detail Desa');
+  const { periodeId, desaId, namaDesa, desa, periode } = useDesaContext();
+
+  const [modal, setModal] = useState(false);
   const [notice, setNotice] = useState('');
-  const namaDesa = desaTerpilih?.nama ?? 'Desa';
+  const [form, setForm] = useState<FormDesa>({});
 
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(''), 2800);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
+  const bukaEdit = () => {
+    setForm({
+      nama: desa.nama ?? desa.namaDesa ?? '',
+      kecamatan: desa.kecamatan ?? periode.kecamatan ?? '',
+      kabupaten: desa.kabupaten ?? periode.kabupaten ?? '',
+      alamat: desa.alamat ?? '',
+      kepalaDesa: desa.kepalaDesa ?? '',
+      telepon: desa.telepon ?? '',
+      klaster: desa.klaster ?? '',
+      pembimbing: desa.pembimbing ?? desa.dosenPembimbing ?? '',
+      nipPembimbing: desa.nipPembimbing ?? '',
+      fakultasPembimbing: desa.fakultasPembimbing ?? '',
+      penguji1: desa.penguji1 ?? desa.penguji ?? '',
+      nipPenguji1: desa.nipPenguji1 ?? '',
+      penguji2: desa.penguji2 ?? '',
+      nipPenguji2: desa.nipPenguji2 ?? '',
+      koordinator: desa.koordinator ?? desa.koordinatorDesa ?? '',
+    });
 
-  if (!periode || !desaTerpilih) {
-    return (
-      <div className="min-h-[60vh] rounded-xl border border-[#E3EAF5] bg-white p-8 text-center">
-        <h1 className="text-lg font-bold text-[#172943]">
-          Data desa tidak ditemukan
-        </h1>
-        <p className="mt-2 text-sm text-[#71819B]">
-          Periksa apakah data periode dan desa sudah tersimpan.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate(`/admin/kkn/periode/${id ?? ''}`)}
-          className="mt-5 rounded-lg bg-[#245BD6] px-4 py-2.5 text-xs font-semibold text-white"
-        >
-          Kembali ke Detail Periode
-        </button>
-      </div>
-    );
-  }
+    setModal(true);
+  };
 
-  const menuDesa = [
-    { label: 'Detail Desa', icon: FileText },
-    { label: 'Pemetaan Prodi', icon: LayoutGrid },
+  const simpan = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      const parsed: unknown = JSON.parse(
+        localStorage.getItem(STORAGE_KEY) || '[]',
+      );
+
+      if (!Array.isArray(parsed)) {
+        throw new Error('Format data periode tidak valid');
+      }
+
+      const semua = parsed as PeriodeDesa[];
+
+      const next = semua.map((item) => {
+        if (String(item.id) !== String(periodeId)) {
+          return item;
+        }
+
+        const rows: DesaRecord[] = item.detail?.daftarDesa ?? [];
+
+        const dataBaru: DesaRecord = {
+          ...desa,
+          ...form,
+          nama: form.nama,
+          namaDesa: form.nama,
+          dosenPembimbing: form.pembimbing,
+          penguji: form.penguji1,
+        };
+
+        const updated =
+          rows.length > 0
+            ? rows.map((row, index) => {
+                const idBaris = String(row.id ?? index + 1);
+
+                return idBaris === String(desaId)
+                  ? { ...row, ...dataBaru }
+                  : row;
+              })
+            : [{ ...dataBaru, id: desa.id }];
+
+        return {
+          ...item,
+          detail: {
+            ...item.detail,
+            daftarDesa: updated,
+          },
+        };
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+
+      setModal(false);
+      setNotice('Perubahan data desa berhasil disimpan.');
+    } catch {
+      setNotice('Gagal menyimpan perubahan data desa.');
+    }
+  };
+
+  const dataDesa: { label: string; value: unknown }[] = [
+    { label: 'Nama Desa', value: namaDesa },
     {
-      label: 'Peserta',
-      icon: Users,
-      badge:
-        nilai(desaTerpilih.peserta) === '-'
-          ? '0 Mhs'
-          : `${desaTerpilih.peserta} Mhs`,
+      label: 'Kecamatan',
+      value: desa.kecamatan ?? periode.kecamatan,
     },
     {
-      label: 'Blog',
-      icon: BookOpen,
-      badge: `${desaTerpilih.jumlahBlog ?? 0} Artikel`,
+      label: 'Kabupaten',
+      value: desa.kabupaten ?? periode.kabupaten,
     },
-    { label: 'Proposal Kelompok', icon: ClipboardList },
-    { label: 'Bukti Kunjungan', icon: CalendarDays },
-    { label: 'Laporan', icon: FileText },
-    { label: 'Nilai', icon: Users },
+    { label: 'Nama Kepala Desa', value: desa.kepalaDesa },
+    { label: 'Telepon Kantor Desa', value: desa.telepon },
+    { label: 'Klaster Penempatan', value: desa.klaster },
   ];
 
+  const dataPenguji: {
+    label: string;
+    nama: unknown;
+    nip: unknown;
+  }[] = [
+    {
+      label: 'Penguji 1',
+      nama: desa.penguji1 ?? desa.penguji,
+      nip: desa.nipPenguji1,
+    },
+    {
+      label: 'Penguji 2',
+      nama: desa.penguji2,
+      nip: desa.nipPenguji2,
+    },
+  ];
+
+  const fieldLabels: Record<string, string> = {
+    nama: 'Nama Desa',
+    kepalaDesa: 'Nama Kepala Desa',
+    alamat: 'Alamat Desa',
+    telepon: 'Telp Kantor Desa',
+    klaster: 'Klaster Penempatan',
+    kecamatan: 'Kecamatan',
+    kabupaten: 'Kabupaten',
+    pembimbing: 'Nama Pembimbing',
+    nipPembimbing: 'NIP Pembimbing',
+    fakultasPembimbing: 'Fakultas Pembimbing',
+    penguji1: 'Nama Penguji 1',
+    nipPenguji1: 'NIP Penguji 1',
+    penguji2: 'Nama Penguji 2',
+    nipPenguji2: 'NIP Penguji 2',
+    koordinator: 'Nama Koordinator Desa',
+  };
+
   return (
-    <div className="min-h-full bg-[#F7F9FC] p-4 sm:p-6 lg:p-7">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E3EAF5] bg-white px-5 py-4 shadow-sm">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-bold text-[#172943]">{namaDesa}</h1>
-            <span className="rounded bg-[#EAF1FF] px-2 py-1 text-[10px] font-semibold text-[#245BD6]">
-              Desa KKN
-            </span>
-            <span className="rounded bg-[#E8F7EF] px-2 py-1 text-[10px] font-semibold text-[#16805D]">
-              {desaTerpilih.status ?? 'Aktif Ditugaskan'}
-            </span>
-          </div>
-          <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-[#71819B]">
-            <MapPin size={13} />
-            {[
-              desaTerpilih.kecamatan ?? periode.kecamatan,
-              desaTerpilih.kabupaten ?? periode.kabupaten,
-              'Provinsi Bali',
-            ]
-              .filter(Boolean)
-              .join(', ')}
+    <div>
+      <div className="mb-6 flex items-start justify-between gap-3 pb-4">
+        <div>
+          <h2 className="text-base font-bold text-[#172943]">
+            Detail Informasi Desa
+          </h2>
+
+          <p className="mt-1 text-xs text-[#71819B]">
+            Data profil wilayah, perangkat desa, serta penugasan dosen
+            pembimbing dan penguji KKN di Desa {namaDesa}.
           </p>
         </div>
+
         <button
           type="button"
-          onClick={() => navigate(`/admin/kkn/periode/${periode?.id ?? id}`)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#DCE5F1] bg-white px-3 py-2 text-[11px] font-semibold text-[#52627A] hover:bg-[#F7F9FC]"
+          onClick={bukaEdit}
+          className="rounded-lg bg-[#EAF1FF] p-2 text-[#245BD6] hover:bg-[#DCE8FF]"
+          aria-label="Ubah informasi desa"
         >
-          <ChevronLeft size={14} /> Kembali ke Daftar Desa
+          <PencilLine size={15} />
         </button>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[215px_minmax(0,1fr)]">
-        <aside className="rounded-xl border border-[#E3EAF5] bg-white p-3 shadow-sm">
-          <p className="px-2 pt-1 text-[9px] font-bold uppercase tracking-widest text-[#8A97AA]">
-            Navigasi Lokal
-          </p>
-          <div className="mb-2 mt-1 flex items-center justify-between px-2">
-            <h2 className="text-xs font-bold text-[#273750]">Menu Desa</h2>
-            <span className="rounded bg-[#EEF4FF] px-2 py-1 text-[9px] font-semibold text-[#45628F]">
-              {namaDesa}
-            </span>
-          </div>
-          <nav className="space-y-1">
-            {menuDesa.map(({ label, icon: Icon, badge }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => setMenuLokalDesa(label)}
-                className={`flex min-h-[34px] w-full items-center gap-2 rounded-md border-l-[3px] px-2.5 py-2 text-left text-[11px] transition ${menuLokalDesa === label ? 'border-[#3569F6] bg-[#EAF1FF] font-semibold text-[#245BD6]' : 'border-transparent text-[#52627A] hover:bg-[#F6F8FC]'}`}
+      <div className="space-y-6">
+        <section>
+          <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#273750]">
+            <MapPin size={14} className="text-emerald-600" />
+            DATA DESA
+          </h3>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {dataDesa.map((item) => (
+              <div
+                key={item.label}
+                className="min-h-[66px] rounded-lg border border-[#C7D9F5] bg-white p-3"
               >
-                <Icon size={13} className="shrink-0" />
-                <span className="min-w-0 flex-1">{label}</span>
-                {badge && (
-                  <span className="rounded-full bg-[#EAF1FF] px-1.5 py-0.5 text-[9px] text-[#45628F]">
-                    {badge}
-                  </span>
-                )}
-              </button>
+                <p className="text-[9px] font-bold uppercase tracking-wide text-[#687993]">
+                  {item.label}
+                </p>
+
+                <p className="mt-1.5 text-[11px] font-semibold text-[#273750]">
+                  {val(item.value)}
+                </p>
+              </div>
             ))}
-          </nav>
-          <div className="my-3 border-t border-[#E8EEF7]" />
-          <p className="px-2 pb-1 text-[9px] font-bold uppercase tracking-widest text-[#8A97AA]">
-            Pengelolaan
-          </p>
-          <button
-            type="button"
-            onClick={() =>
-              setNotice(
-                'Fitur Ubah Desa akan dihubungkan setelah data desa tersedia.',
-              )
-            }
-            className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-[11px] text-[#52627A] hover:bg-[#F6F8FC]"
-          >
-            <PencilLine size={13} /> Ubah Desa
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setNotice(
-                `Desa ${namaDesa} belum dihapus. Hubungkan ke penyimpanan data desa terlebih dahulu.`,
-              );
-            }}
-            className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-[11px] text-[#D64545] hover:bg-red-50"
-          >
-            <Trash2 size={13} /> Hapus Desa
-          </button>
-        </aside>
 
-        <main className="min-w-0 rounded-xl border border-[#E3EAF5] bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-6 flex flex-wrap items-start justify-between gap-3 border-b border-[#E8EEF7] pb-4">
-            <div>
-              <h2 className="text-base font-bold text-[#172943]">
-                {menuLokalDesa === 'Detail Desa'
-                  ? 'Detail Informasi Desa'
-                  : menuLokalDesa}
-              </h2>
-              <p className="mt-1 max-w-2xl text-xs leading-5 text-[#71819B]">
-                Data profil wilayah, perangkat desa, serta penugasan dosen
-                pembimbing dan penguji KKN di Desa {namaDesa}.
+            <div className="rounded-lg border border-[#C7D9F5] bg-white p-3 sm:col-span-2 xl:col-span-3">
+              <p className="text-[9px] font-bold uppercase text-[#687993]">
+                Alamat Kantor / Titik Kumpul
+              </p>
+
+              <p className="mt-1.5 text-[11px] text-[#273750]">
+                {val(desa.alamat)}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() =>
-                setNotice(
-                  'Fitur edit detail desa belum dihubungkan ke penyimpanan data.',
-                )
-              }
-              className="rounded-lg bg-[#EAF1FF] p-2 text-[#245BD6] hover:bg-[#DCE8FF]"
-              aria-label="Ubah informasi desa"
-            >
-              <PencilLine size={15} />
-            </button>
           </div>
+        </section>
 
-          {menuLokalDesa === 'Detail Desa' ? (
-            <div className="space-y-6">
-              <section>
-                <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#273750]">
-                  <MapPin size={14} className="text-emerald-600" /> DATA DESA
-                </h3>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {[
-                    ['Nama Desa', namaDesa],
-                    ['Kecamatan', desaTerpilih.kecamatan ?? periode.kecamatan],
-                    ['Kabupaten', desaTerpilih.kabupaten ?? periode.kabupaten],
-                    ['Nama Kepala Desa', desaTerpilih.kepalaDesa],
-                    ['Telepon Kantor Desa', desaTerpilih.telepon],
-                    ['Klaster Penempatan', desaTerpilih.klaster],
-                  ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="min-h-[66px] rounded-lg bg-[#EEF3FF] p-3"
-                    >
-                      <p className="text-[9px] font-bold uppercase tracking-wide text-[#687993]">
-                        {label}
-                      </p>
-                      <p className="mt-1.5 break-words text-[11px] font-semibold text-[#273750]">
-                        {nilai(value)}
-                      </p>
-                    </div>
-                  ))}
-                  <div className="rounded-lg bg-[#EEF3FF] p-3 sm:col-span-2 xl:col-span-3">
-                    <p className="text-[9px] font-bold uppercase tracking-wide text-[#687993]">
-                      Alamat Kantor / Titik Kumpul
-                    </p>
-                    <p className="mt-1.5 flex items-start gap-1.5 text-[11px] text-[#273750]">
-                      <MapPin size={13} className="mt-0.5 shrink-0" />
-                      {nilai(desaTerpilih.alamat)}
-                    </p>
-                  </div>
-                </div>
-              </section>
-              <section>
-                <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#273750]">
-                  <UserCheck size={14} className="text-emerald-600" />{' '}
-                  PEMBIMBING LAPANGAN (DPL)
-                </h3>
-                <div className="rounded-lg bg-[#EEF3FF] p-4">
-                  <p className="text-sm font-bold text-[#273750]">
-                    {nilai(
-                      desaTerpilih.pembimbing ?? desaTerpilih.dosenPembimbing,
-                    )}
-                  </p>
-                  <span className="mt-2 inline-block rounded bg-[#DCE8FF] px-2 py-1 text-[9px] font-semibold text-[#245BD6]">
-                    Dosen Pembimbing Lapangan
-                  </span>
-                  <p className="mt-2 text-[10px] text-[#71819B]">
-                    NIP: {nilai(desaTerpilih.nipPembimbing)}
-                  </p>
-                  <p className="mt-1 text-[10px] text-[#71819B]">
-                    Fakultas: {nilai(desaTerpilih.fakultasPembimbing)}
-                  </p>
-                </div>
-              </section>
-              <section>
-                <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#273750]">
-                  <GraduationCap size={14} className="text-emerald-600" /> DOSEN
-                  PENGUJI
-                </h3>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  {[
-                    [
-                      'Penguji 1',
-                      desaTerpilih.penguji1 ?? desaTerpilih.penguji,
-                    ],
-                    ['Penguji 2', desaTerpilih.penguji2],
-                  ].map(([label, name]) => (
-                    <div
-                      key={label}
-                      className="rounded-lg border border-[#E3EAF5] p-4"
-                    >
-                      <p className="text-[9px] font-bold uppercase tracking-wide text-[#71819B]">
-                        {label}
-                      </p>
-                      <p className="mt-2 text-xs font-bold text-[#273750]">
-                        {nilai(name)}
-                      </p>
-                      <p className="mt-1 text-[10px] text-[#71819B]">
-                        Informasi NIP belum tersedia
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-              <section>
-                <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#273750]">
-                  <Users size={14} className="text-emerald-600" /> KOORDINATOR
-                  DESA
-                </h3>
-                <div className="rounded-lg border border-[#E3EAF5] p-4">
-                  <p className="text-xs font-bold text-[#273750]">
-                    {nilai(
-                      desaTerpilih.koordinator ?? desaTerpilih.koordinatorDesa,
-                    )}
-                  </p>
-                  <p className="mt-1 text-[10px] text-[#71819B]">
-                    Koordinator Desa KKN
-                  </p>
-                </div>
-              </section>
-            </div>
-          ) : (
-            <div className="flex min-h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-[#DCE5F1] bg-[#FBFCFE] p-8 text-center">
-              <ClipboardList size={24} className="text-[#8EA4C6]" />
-              <h3 className="mt-3 text-sm font-bold text-[#273750]">
-                {menuLokalDesa}
-              </h3>
-              <p className="mt-2 max-w-md text-xs leading-5 text-[#71819B]">
-                Bagian ini sudah disiapkan dalam navigasi lokal Desa {namaDesa}.
-                Kontennya perlu dihubungkan dengan data modul terkait.
-              </p>
-            </div>
-          )}
-        </main>
+        <section>
+          <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#273750]">
+            <UserCheck size={14} className="text-emerald-600" />
+            PEMBIMBING LAPANGAN (DPL)
+          </h3>
+
+          <div className="rounded-lg border border-[#C7D9F5] bg-white p-4">
+            <p className="text-sm font-bold text-[#273750]">
+              {val(desa.pembimbing ?? desa.dosenPembimbing)}
+            </p>
+
+            <span className="mt-2 inline-block rounded bg-[#DCE8FF] px-2 py-1 text-[9px] font-semibold text-[#245BD6]">
+              Dosen Pembimbing Lapangan
+            </span>
+
+            <p className="mt-2 text-[10px] text-[#71819B]">
+              NIP: {val(desa.nipPembimbing)}
+            </p>
+
+            <p className="mt-1 text-[10px] text-[#71819B]">
+              Fakultas: {val(desa.fakultasPembimbing)}
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#273750]">
+            <GraduationCap size={14} className="text-emerald-600" />
+            DOSEN PENGUJI
+          </h3>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {dataPenguji.map((item) => (
+              <div
+                key={item.label}
+                className="rounded-lg border border-[#C7D9F5] bg-white p-4"
+              >
+                <p className="text-[9px] font-bold uppercase text-[#71819B]">
+                  {item.label}
+                </p>
+
+                <p className="mt-2 text-xs font-bold text-[#273750]">
+                  {val(item.nama)}
+                </p>
+
+                <p className="mt-1 text-[10px] text-[#71819B]">
+                  NIP: {val(item.nip)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h3 className="mb-3 flex items-center gap-2 text-xs font-bold text-[#273750]">
+            <Users size={14} className="text-emerald-600" />
+            KOORDINATOR DESA
+          </h3>
+
+          <div className="rounded-lg border border-[#C7D9F5] bg-white p-4">
+            <p className="text-xs font-bold text-[#273750]">
+              {val(desa.koordinator ?? desa.koordinatorDesa)}
+            </p>
+
+            <p className="mt-1 text-[10px] text-[#71819B]">
+              Koordinator Desa KKN
+            </p>
+          </div>
+        </section>
       </div>
+
+      {modal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-[#14233B]/45 p-3 sm:p-5">
+          <form
+            onSubmit={simpan}
+            className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-[#C7D9F5] bg-white shadow-2xl"
+          >
+            <div className="sticky top-0 z-10 flex justify-between border-b border-[#C7D9F5] bg-white px-5 py-4">
+              <div>
+                <h2 className="text-sm font-bold text-[#172943]">Ubah Desa</h2>
+
+                <p className="mt-1 text-[10px] text-[#71819B]">
+                  Perbarui informasi desa dan penanggung jawab KKN.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setModal(false)}
+                className="p-1 text-[#8492A6]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
+              {Object.entries(fieldLabels).map(([key, label]) => (
+                <label
+                  key={key}
+                  className={key === 'alamat' ? 'sm:col-span-2' : ''}
+                >
+                  <span className="mb-1 block text-[10px] font-medium text-[#52627A]">
+                    {label}
+                  </span>
+
+                  {key === 'alamat' ? (
+                    <textarea
+                      rows={2}
+                      value={form[key] ?? ''}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          [key]: event.target.value,
+                        }))
+                      }
+                      className="w-full rounded-md border border-[#AFC8F5] px-3 py-2 text-[11px] outline-none focus:border-[#3569F6]"
+                    />
+                  ) : (
+                    <input
+                      value={form[key] ?? ''}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          [key]: event.target.value,
+                        }))
+                      }
+                      className="h-9 w-full rounded-md border border-[#AFC8F5] px-3 text-[11px] outline-none focus:border-[#3569F6]"
+                    />
+                  )}
+                </label>
+              ))}
+            </div>
+
+            <div className="sticky bottom-0 flex justify-end gap-2 border-t bg-white px-5 py-3">
+              <button
+                type="button"
+                onClick={() => setModal(false)}
+                className="rounded-md border border-[#8DB2FF] px-4 py-2 text-[11px] font-semibold text-[#245BD6]"
+              >
+                Batal
+              </button>
+
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 rounded-md bg-[#245BD6] px-4 py-2 text-[11px] font-semibold text-white"
+              >
+                <Check size={14} />
+                Simpan Perubahan
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {notice && (
         <div
           role="status"
-          className="fixed right-5 top-5 z-[100] rounded-lg border border-[#C9D9FF] bg-white px-4 py-3 text-xs text-[#273750] shadow-lg"
+          className="fixed right-5 top-5 z-[150] rounded-lg border border-[#C9D9FF] bg-white px-4 py-3 text-xs text-[#273750] shadow-lg"
         >
           {notice}
+          <button
+            type="button"
+            onClick={() => setNotice('')}
+            className="ml-3 font-semibold text-[#245BD6]"
+          >
+            Tutup
+          </button>
         </div>
       )}
     </div>

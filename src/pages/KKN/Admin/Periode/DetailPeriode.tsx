@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -44,6 +44,8 @@ type DesaKKN = {
   penguji?: string;
   penguji1?: string;
   penguji2?: string;
+  nipPenguji1?: string;
+  nipPenguji2?: string;
   koordinator?: string;
   koordinatorDesa?: string;
   status?: string;
@@ -134,9 +136,88 @@ const statusAwal: Record<string, boolean> = {
 function bacaPeriode(id: number): PeriodeKKNData | null {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    const data: unknown = saved ? JSON.parse(saved) : [];
+    const data: PeriodeKKNData[] = saved ? JSON.parse(saved) : [];
     if (!Array.isArray(data)) return null;
-    return (data as PeriodeKKNData[]).find((item) => item.id === id) ?? null;
+    const index = data.findIndex((item) => item.id === id);
+    if (index < 0) return null;
+
+    const current = data[index];
+    // Data contoh lengkap untuk periode demo yang sebelumnya masih kosong.
+    // Tidak menimpa data yang sudah pernah diisi pengguna.
+    if (
+      id === 1 &&
+      (!current.detail || Object.keys(current.detail).length === 0)
+    ) {
+      const detail = {
+        tahunAjar: current.tahunAjar || '2026/2027',
+        semester: current.semester || 'Ganjil',
+        putaran: current.putaran || 1,
+        kabupaten: current.kabupaten || 'Kabupaten Buleleng',
+        kecamatan: current.kecamatan || 'Sukasada',
+        desa: current.desa || 'Sambangan',
+        pendaftaranAwal: '2026-08-03',
+        pendaftaranAkhir: '2026-08-14',
+        batasProposal: '2026-08-21',
+        batasUsulanDosen: '2026-08-28',
+        pelaksanaanAwal: '2026-09-07',
+        pelaksanaanAkhir: '2026-12-18',
+        penilaianLapangan: '2026-12-07',
+        targetBimbingan: '4',
+        anggotaMinimal: '6',
+        anggotaMaksimal: '16',
+        lakiLakiMinimal: '8',
+        perempuanMinimal: '8',
+        ketuaLP2M: 'Prof. Dr. I Wayan Suwendra, S.Pd., M.Pd.',
+        nipLP2M: '196900000000000001',
+        ketuaPPKO: 'Dr. I Made Suryasa, S.Pd., M.Pd.',
+        nipPPKO: '197000000000000002',
+        pejabatPengesahan: 'Dr. I Gede Sudirtha, S.Pd., M.Pd.',
+        nipPengesahan: '197000000000000003',
+        agenda: [],
+        daftarDesa: [
+          {
+            id: 1001,
+            nama: 'Sambangan',
+            namaDesa: 'Sambangan',
+            kecamatan: 'Sukasada',
+            kabupaten: 'Kabupaten Buleleng',
+            alamat:
+              'Desa Sambangan, Kecamatan Sukasada, Kabupaten Buleleng, Bali',
+            kepalaDesa: 'I Made Suardana',
+            telepon: '081234567890',
+            klaster: 'Desa Wisata',
+            pembimbing: 'Dr. Ni Luh Putu Srinadi, S.Si., M.Si.',
+            dosenPembimbing: 'Dr. Ni Luh Putu Srinadi, S.Si., M.Si.',
+            nipPembimbing: '197812122005012003',
+            fakultasPembimbing: 'FMIPA',
+            penguji: 'I Putu Gede Sudarma, S.Kom., M.Cs.',
+            penguji1: 'I Putu Gede Sudarma, S.Kom., M.Cs.',
+            nipPenguji1: '198503152010121005',
+            penguji2: 'Ni Made Dwi Mahayanti, S.Pd., M.Pd.',
+            nipPenguji2: '198702202014042001',
+            koordinator: 'I Komang Adi Putra',
+            koordinatorDesa: 'I Komang Adi Putra',
+            peserta: 12,
+            jumlahPeserta: 12,
+            jumlahBlog: 8,
+            status: 'Aktif Ditugaskan',
+          },
+        ],
+      };
+      data[index] = {
+        ...current,
+        tahunAjar: String(detail.tahunAjar),
+        semester: String(detail.semester),
+        putaran: Number(detail.putaran),
+        kabupaten: String(detail.kabupaten),
+        kecamatan: String(detail.kecamatan),
+        desa: String(detail.desa),
+        detail,
+      } as PeriodeKKNData;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      return data[index];
+    }
+    return current;
   } catch {
     return null;
   }
@@ -176,6 +257,27 @@ export default function DetailPeriode() {
   const [desaDihapus, setDesaDihapus] = useState<Array<string | number>>([]);
   const [editStatus, setEditStatus] = useState(false);
   const [cariDesa, setCariDesa] = useState('');
+  const [modalDesa, setModalDesa] = useState(false);
+  const [editDesaId, setEditDesaId] = useState<string | number | null>(null);
+  const [formDesa, setFormDesa] = useState({
+    nama: '',
+    kecamatan: '',
+    kabupaten: '',
+    alamat: '',
+    kepalaDesa: '',
+    telepon: '',
+    klaster: '',
+    pembimbing: '',
+    nipPembimbing: '',
+    fakultasPembimbing: '',
+    penguji1: '',
+    nipPenguji1: '',
+    penguji2: '',
+    nipPenguji2: '',
+    koordinatorDesa: '',
+    peserta: '0',
+    jumlahBlog: '0',
+  });
 
   const [statusParameter, setStatusParameter] = useState<
     Record<string, boolean>
@@ -185,6 +287,130 @@ export default function DetailPeriode() {
   }));
 
   const [notice, setNotice] = useState('');
+
+  function bukaModalDesa() {
+    setEditDesaId(null);
+    setFormDesa({
+      nama: '',
+      kecamatan: periode?.kecamatan ?? '',
+      kabupaten: periode?.kabupaten ?? '',
+      alamat: '',
+      kepalaDesa: '',
+      telepon: '',
+      klaster: '',
+      pembimbing: '',
+      nipPembimbing: '',
+      fakultasPembimbing: '',
+      penguji1: '',
+      nipPenguji1: '',
+      penguji2: '',
+      nipPenguji2: '',
+      koordinatorDesa: '',
+      peserta: '0',
+      jumlahBlog: '0',
+    });
+    setModalDesa(true);
+  }
+
+  function simpanDesa(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!periode || !formDesa.nama.trim()) return;
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const data: PeriodeKKNData[] = saved ? JSON.parse(saved) : [];
+      const current = data.find((item) => item.id === periode.id);
+      if (!current) throw new Error('Periode tidak ditemukan');
+
+      const oldRows = Array.isArray(current.detail?.daftarDesa)
+        ? (current.detail.daftarDesa as Array<Record<string, unknown>>)
+        : current.desa
+          ? [
+              {
+                id: current.id,
+                nama: current.desa,
+                kecamatan: current.kecamatan,
+                kabupaten: current.kabupaten,
+                status: 'Belum Ditugaskan',
+              },
+            ]
+          : [];
+
+      const desaBaru = {
+        id: Date.now(),
+        ...formDesa,
+        nama: formDesa.nama.trim(),
+        namaDesa: formDesa.nama.trim(),
+        peserta: Number(formDesa.peserta) || 0,
+        jumlahBlog: Number(formDesa.jumlahBlog) || 0,
+        status: 'Belum Ditugaskan',
+      };
+
+      const daftarDesaTerbaru =
+        editDesaId === null
+          ? [...oldRows, desaBaru]
+          : oldRows.map((row, index) =>
+              String(row.id ?? index + 1) === String(editDesaId)
+                ? { ...row, ...desaBaru, id: row.id ?? editDesaId }
+                : row,
+            );
+      const updated = data.map((item) =>
+        item.id === periode.id
+          ? {
+              ...item,
+              detail: { ...item.detail, daftarDesa: daftarDesaTerbaru },
+            }
+          : item,
+      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      const periodeTerbaru =
+        updated.find((item) => item.id === periode.id) ?? null;
+      setPeriode(periodeTerbaru);
+      setModalDesa(false);
+      setNotice(
+        editDesaId === null
+          ? 'Data desa berhasil ditambahkan.'
+          : 'Data desa berhasil diperbarui.',
+      );
+      setEditDesaId(null);
+    } catch {
+      setNotice('Data desa gagal disimpan.');
+    }
+  }
+
+  function hapusDesa(idDesa: string | number, nama: string) {
+    if (!periode || !window.confirm(`Hapus Desa ${nama} dari periode ini?`))
+      return;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const data: PeriodeKKNData[] = saved ? JSON.parse(saved) : [];
+      const current = data.find((item) => item.id === periode.id);
+      if (!current) return;
+      const rows = Array.isArray(current.detail?.daftarDesa)
+        ? (current.detail.daftarDesa as Array<Record<string, unknown>>)
+        : [];
+      const updated = data.map((item) =>
+        item.id === periode.id
+          ? {
+              ...item,
+              detail: {
+                ...item.detail,
+                daftarDesa: rows.filter(
+                  (row, index) =>
+                    String(row.id ?? index + 1) !== String(idDesa),
+                ),
+              },
+            }
+          : item,
+      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      setPeriode(updated.find((item) => item.id === periode.id) ?? null);
+      setDesaDihapus([]);
+      setNotice('Data desa berhasil dihapus.');
+    } catch {
+      setNotice('Data desa gagal dihapus.');
+    }
+  }
 
   useEffect(() => {
     if (!notice) return;
@@ -216,6 +442,8 @@ export default function DetailPeriode() {
         penguji: row.penguji ? String(row.penguji) : undefined,
         penguji1: row.penguji1 ? String(row.penguji1) : undefined,
         penguji2: row.penguji2 ? String(row.penguji2) : undefined,
+        nipPenguji1: row.nipPenguji1 ? String(row.nipPenguji1) : undefined,
+        nipPenguji2: row.nipPenguji2 ? String(row.nipPenguji2) : undefined,
         koordinator: row.koordinator
           ? String(row.koordinator)
           : row.koordinatorDesa
@@ -921,11 +1149,7 @@ export default function DetailPeriode() {
                 <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                   <button
                     type="button"
-                    onClick={() =>
-                      setNotice(
-                        'Form tambah desa akan dibuka di bagian pengelolaan desa.',
-                      )
-                    }
+                    onClick={bukaModalDesa}
                     className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#3569F6] px-3.5 text-[11px] font-semibold text-white transition hover:bg-[#245BD6]"
                   >
                     <Plus size={15} />
@@ -1039,8 +1263,8 @@ export default function DetailPeriode() {
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
-                                title="Lihat detail desa"
-                                aria-label={`Lihat detail ${desa.nama ?? desa.namaDesa ?? 'desa'}`}
+                                title="Lihat desa"
+                                aria-label={`Lihat ${desa.nama ?? 'desa'}`}
                                 onClick={() =>
                                   navigate(
                                     `/admin/kkn/periode/${periode.id}/desa/${desa.id}`,
@@ -1053,19 +1277,10 @@ export default function DetailPeriode() {
                               <button
                                 type="button"
                                 title="Hapus desa"
-                                aria-label={`Hapus ${desa.nama ?? desa.namaDesa ?? 'desa'}`}
-                                onClick={() => {
-                                  if (
-                                    window.confirm(
-                                      `Hapus data Desa ${desa.nama ?? desa.namaDesa ?? ''} dari tampilan daftar ini?`,
-                                    )
-                                  ) {
-                                    setDesaDihapus((current) => [
-                                      ...current,
-                                      desa.id,
-                                    ]);
-                                  }
-                                }}
+                                aria-label={`Hapus ${desa.nama ?? 'desa'}`}
+                                onClick={() =>
+                                  hapusDesa(desa.id, desa.nama ?? 'Desa')
+                                }
                                 className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#FFCACA] bg-white text-[#D64545] transition hover:bg-[#FFF3F3]"
                               >
                                 <Trash2 size={15} />
@@ -1166,6 +1381,99 @@ export default function DetailPeriode() {
           </div>
         )}
       </section>
+
+      {modalDesa && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-[#1B2738]/55 p-3 sm:p-5">
+          <form
+            onSubmit={simpanDesa}
+            className="my-auto max-h-[94vh] w-full max-w-[850px] overflow-y-auto rounded-xl bg-white shadow-2xl"
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E8EEF7] bg-white px-5 py-4">
+              <div>
+                <h2 className="text-sm font-bold text-[#172943]">
+                  {editDesaId === null ? 'Tambah Desa KKN' : 'Ubah Data Desa'}
+                </h2>
+                <p className="mt-1 text-[11px] text-[#71819B]">
+                  Isi informasi desa, pembimbing, penguji, dan koordinator.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModalDesa(false)}
+                className="rounded-md px-2 py-1 text-[#71819B] hover:bg-slate-100"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
+              {(
+                [
+                  ['Nama Desa', 'nama'],
+                  ['Kecamatan', 'kecamatan'],
+                  ['Kabupaten', 'kabupaten'],
+                  ['Alamat', 'alamat'],
+                  ['Kepala Desa', 'kepalaDesa'],
+                  ['Telepon', 'telepon'],
+                  ['Klaster', 'klaster'],
+                  ['Dosen Pembimbing Lapangan', 'pembimbing'],
+                  ['NIP DPL', 'nipPembimbing'],
+                  ['Fakultas DPL', 'fakultasPembimbing'],
+                  ['Penguji 1', 'penguji1'],
+                  ['NIP Penguji 1', 'nipPenguji1'],
+                  ['Penguji 2', 'penguji2'],
+                  ['NIP Penguji 2', 'nipPenguji2'],
+                  ['Koordinator Desa', 'koordinatorDesa'],
+                  ['Jumlah Peserta', 'peserta'],
+                  ['Jumlah Artikel Blog', 'jumlahBlog'],
+                ] as const
+              ).map(([label, key]) => (
+                <label
+                  key={key}
+                  className="block text-[10px] font-semibold text-[#43536B]"
+                >
+                  {label}
+                  {key === 'nama' && <span className="text-red-500"> *</span>}
+                  <input
+                    required={key === 'nama'}
+                    type={
+                      key === 'peserta' || key === 'jumlahBlog'
+                        ? 'number'
+                        : 'text'
+                    }
+                    min={
+                      key === 'peserta' || key === 'jumlahBlog' ? 0 : undefined
+                    }
+                    value={formDesa[key]}
+                    onChange={(event) =>
+                      setFormDesa((current) => ({
+                        ...current,
+                        [key]: event.target.value,
+                      }))
+                    }
+                    placeholder={`Masukkan ${label.toLowerCase()}`}
+                    className="mt-1.5 h-9 w-full rounded-md border border-[#DCE5F1] px-3 text-[11px] outline-none focus:border-[#3569F6]"
+                  />
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 border-t border-[#E8EEF7] px-5 py-4">
+              <button
+                type="button"
+                onClick={() => setModalDesa(false)}
+                className="h-9 rounded-md border border-[#D7E0EC] px-4 text-[11px] font-semibold text-[#52627A]"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                className="h-9 rounded-md bg-[#3569F6] px-4 text-[11px] font-semibold text-white hover:bg-[#245BD6]"
+              >
+                {editDesaId === null ? 'Simpan Desa' : 'Simpan Perubahan'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {editStatus && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-[#1B2738]/55 p-3 backdrop-blur-[1px] sm:p-5">

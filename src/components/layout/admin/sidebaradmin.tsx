@@ -2,10 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserRound, ChevronDown, ChevronRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+
+import { menuMagangAdmin } from './magang/menu';
 import { menuKKNAdmin } from './KKN/menu';
 
-interface SidebarAdminKKNProps {
+interface SidebarAdminProps {
   isOpen?: boolean;
+  program?: 'magang' | 'kkn';
   activeMenu?: string;
   onMenuChange?: (menu: string) => void;
 }
@@ -16,12 +19,35 @@ type MenuItem = {
   children?: (string | MenuItem)[];
 };
 
-const menuItems = menuKKNAdmin as MenuItem[];
+const menuPathsMagang: Record<string, string> = {
+  Dashboard: '/admin/magang/dashboard',
+  Periode: '/admin/magang/periode',
+  Tempat: '/admin/magang/tempat-magang',
+  Pengumuman: '/admin/magang/pengumuman',
+  'Surat perjalanan Dinas': '/admin/magang/spd',
+  'Kelola Peserta': '/admin/magang/manajemen',
+  Penilaian: '/admin/magang/penilaian',
+  'Data User': '/admin/magang/data-user',
+  'Data Dosen': '/admin/magang/data-dosen',
+  'Data Mahasiswa': '/admin/magang/data-mahasiswa',
+  'Data Mentor': '/admin/magang/data-mentor',
+  Dokumen: '/admin/magang/surat',
+  Penguji: '/admin/magang/data-instrumen-nilai/penguji',
+  Pemonitor: '/admin/magang/data-instrumen-nilai/pemonitor',
+  Mitra: '/admin/magang/data-instrumen-nilai/mitra',
+  Pembimbing: '/admin/magang/data-instrumen-nilai/pembimbing',
+  'Data Fakultas': '/admin/magang/data-fakultas',
+  'Data Jurusan': '/admin/magang/data-jurusan',
+  'Data Prodi': '/admin/magang/data-prodi',
+  'Jurnal Harian': '/admin/magang/jurnal-harian',
+  'Log Book Bimbingan': '/admin/magang/logbook-bimbingan',
+  Pengaturan: '/admin/magang/pengaturan',
+  'Log Aktivitas': '/admin/magang/log-aktivitas',
+};
 
-const menuPaths: Record<string, string> = {
+const menuPathsKKN: Record<string, string> = {
   Dashboard: '/admin/kkn/dashboard',
   Periode: '/admin/kkn/periode',
-  'Data Mahasiswa': '/admin/kkn/data-mahasiswa',
   'Lokasi KKN': '/admin/kkn/lokasi-kkn',
   'Kelompok KKN': '/admin/kkn/kelompok',
   'Dosen Pembimbing': '/admin/kkn/data-dosen',
@@ -30,22 +56,28 @@ const menuPaths: Record<string, string> = {
   'Log Aktivitas': '/admin/kkn/log-aktivitas',
 };
 
-export default function SidebarAdminKKN({
+export default function SidebarAdmin({
   isOpen = true,
-  activeMenu = 'Dashboard',
+  program = 'magang',
+  activeMenu,
   onMenuChange,
-}: SidebarAdminKKNProps) {
+}: SidebarAdminProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const menuScrollRef = useRef<HTMLElement>(null);
-
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+
+  const menuItems = (
+    program === 'kkn' ? menuKKNAdmin : menuMagangAdmin
+  ) as MenuItem[];
+
+  const menuPaths = program === 'kkn' ? menuPathsKKN : menuPathsMagang;
 
   useEffect(() => {
     if (menuScrollRef.current) {
       menuScrollRef.current.scrollTop = 0;
     }
-  }, []);
+  }, [program]);
 
   const toggleMenu = (label: string) => {
     setExpandedMenus((current) =>
@@ -96,7 +128,7 @@ export default function SidebarAdminKKN({
       const isActive = isMenuActive(item.label) || isAncestorActive(item);
 
       return (
-        <div key={item.label}>
+        <div key={`${program}-${item.label}`}>
           <button
             type="button"
             title={!isOpen ? item.label : undefined}
@@ -142,7 +174,7 @@ export default function SidebarAdminKKN({
                 if (typeof child === 'string') {
                   return (
                     <button
-                      key={child}
+                      key={`${item.label}-${child}`}
                       type="button"
                       onClick={() => openMenu(child)}
                       className={`flex min-h-[38px] w-full items-center gap-3 rounded-lg py-2 pr-2 text-left text-xs transition-colors ${
@@ -167,6 +199,10 @@ export default function SidebarAdminKKN({
         </div>
       );
     });
+
+  const dashboardItems = menuItems.filter((item) => item.label === 'Dashboard');
+
+  const otherItems = menuItems.filter((item) => item.label !== 'Dashboard');
 
   return (
     <aside
@@ -220,7 +256,9 @@ export default function SidebarAdminKKN({
 
           {isOpen && (
             <div className="min-w-0">
-              <p className="truncate text-xs font-bold text-white">Admin KKN</p>
+              <p className="truncate text-xs font-bold text-white">
+                {program === 'kkn' ? 'Admin KKN' : 'Admin Magang'}
+              </p>
               <p className="truncate text-[11px] text-blue-200">
                 Administrator
               </p>
@@ -234,27 +272,15 @@ export default function SidebarAdminKKN({
         ref={menuScrollRef}
         className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-3 pb-4 pt-2"
       >
-        {/* Dashboard */}
-        <div className="space-y-1.5">{renderMenu(menuItems.slice(0, 1))}</div>
+        <div className="space-y-1.5">{renderMenu(dashboardItems)}</div>
 
-        {/* Manajemen KKN */}
         <div className="mt-4 space-y-1.5">
           {isOpen && (
             <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-              Manajemen KKN
+              {program === 'kkn' ? 'Manajemen KKN' : 'Manajemen Magang'}
             </p>
           )}
-          {renderMenu(menuItems.slice(1, 6))}
-        </div>
-
-        {/* Menu lainnya */}
-        <div className="mt-4 space-y-1.5">
-          {isOpen && (
-            <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-              Menu Lainnya
-            </p>
-          )}
-          {renderMenu(menuItems.slice(6))}
+          {renderMenu(otherItems)}
         </div>
       </nav>
     </aside>
