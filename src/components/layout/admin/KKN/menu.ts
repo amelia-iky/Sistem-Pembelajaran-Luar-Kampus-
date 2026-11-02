@@ -10,12 +10,15 @@ import {
 } from 'lucide-react';
 
 export const menuKKNAdmin = [
-  { label: 'Dashboard', icon: Home },
-  { label: 'Periode', icon: CalendarDays },
-  { label: 'Lokasi KKN', icon: MapPin },
-  { label: 'Kelompok KKN', icon: UsersRound },
-  { label: 'Dosen Pembimbing', icon: GraduationCap },
-  { label: 'Penilaian', icon: ClipboardCheck },
-  { label: 'Dokumen KKN', icon: FileText },
-  { label: 'Log Aktivitas', icon: FileClock },
+  // MAIN
+  { section: 'MAIN', label: 'Dashboard', icon: Home },
+  { section: 'MAIN', label: 'Periode KKN', icon: CalendarDays },
+  { section: 'MAIN', label: 'Pengumuman', icon: MapPin },
+  { section: 'MAIN', label: 'Running Text', icon: FileClock },
+
+  // DATA MASTER
+  { section: 'DATA MASTER', label: 'Dosen', icon: GraduationCap },
+  { section: 'DATA MASTER', label: 'Mahasiswa', icon: ClipboardCheck },
+  { section: 'DATA MASTER', label: 'Pengguna', icon: UsersRound },
+  { section: 'DATA MASTER', label: 'Lokasi', icon: FileText },
 ];

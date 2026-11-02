@@ -5,7 +5,7 @@ import {
   CalendarDays,
   MapPin,
   Users,
-  Trophy,
+  ScanSearch,
   Newspaper,
   FileText,
   MoreHorizontal,
@@ -17,12 +17,14 @@ import {
   UserRound,
   Search,
   Plus,
-  Download,
   Eye,
   Trash2,
-  RefreshCw,
 } from 'lucide-react';
 import { STORAGE_KEY, type PeriodeKKNData } from './Periode';
+import DaftarPeserta from './DaftarPeserta';
+import Pemonev from './Pemonev';
+import Blog from './Blog';
+import SuratTugas from './SuratTugas';
 
 type AgendaKegiatan = {
   id?: number;
@@ -92,7 +94,7 @@ const tabs = [
   { label: 'Informasi Dasar', icon: CalendarDays },
   { label: 'Daftar Desa', icon: MapPin },
   { label: 'Daftar Peserta', icon: Users },
-  { label: 'Daftar Pemenang', icon: Trophy },
+  { label: 'Daftar Pemonev', icon: ScanSearch },
   { label: 'Blog', icon: Newspaper },
   { label: 'SPD dan Surat Tugas Dosen', icon: FileText },
   { label: 'Aksi', icon: MoreHorizontal },
@@ -142,8 +144,7 @@ function bacaPeriode(id: number): PeriodeKKNData | null {
     if (index < 0) return null;
 
     const current = data[index];
-    // Data contoh lengkap untuk periode demo yang sebelumnya masih kosong.
-    // Tidak menimpa data yang sudah pernah diisi pengguna.
+
     if (
       id === 1 &&
       (!current.detail || Object.keys(current.detail).length === 0)
@@ -482,6 +483,10 @@ export default function DetailPeriode() {
 
     return [];
   }, [detail, periode]);
+
+  const desaUntukBlog = daftarDesa.find(
+    (desa) => !desaDihapus.includes(desa.id),
+  );
 
   function simpanStatus() {
     if (!periode) return;
@@ -1119,70 +1124,42 @@ export default function DetailPeriode() {
           </div>
         ) : tabAktif === 'Daftar Desa' ? (
           <div className="p-4 sm:p-6">
-            {/* Card pencarian dan aksi mengikuti halaman Pengumuman Magang */}
-            <section className="mb-5 rounded-[10px] border border-[#B8CCFF] bg-white p-4 shadow-[0_2px_5px_rgba(31,52,80,0.04)]">
-              <div className="mb-4">
-                <h2 className="text-[13px] font-bold text-[#172943]">
-                  Daftar Desa
-                </h2>
-                <p className="mt-1 text-[11px] leading-4 text-[#71819B]">
-                  Daftar desa yang termasuk dalam periode KKN ini.
-                </p>
+            <div className="mb-5">
+              <h2 className="text-[15px] font-bold text-[#172943]">
+                Daftar Desa
+              </h2>
+              <p className="mt-1 text-[11px] text-[#71819B]">
+                Daftar desa yang termasuk dalam periode KKN ini.
+              </p>
+            </div>
+
+            <section className="mb-5 flex flex-col gap-3 rounded-[10px] border border-[#DCE7F7] bg-white p-4 shadow-[0_2px_5px_rgba(31,52,80,0.04)] sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative w-full min-w-0 sm:max-w-[560px] sm:flex-1">
+                <Search
+                  size={16}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8EA3C0]"
+                />
+                <input
+                  type="search"
+                  value={cariDesa}
+                  onChange={(event) => setCariDesa(event.target.value)}
+                  placeholder="Cari nama desa, kecamatan, atau kabupaten..."
+                  aria-label="Cari desa"
+                  className="h-10 w-full rounded-md border border-[#B8CCFF] bg-[#E7F0FC] pl-9 pr-3 text-[12px] text-[#34445E] outline-none placeholder:text-[#91A4BF] focus:border-[#3569F6] focus:ring-2 focus:ring-[#3569F6]/10"
+                />
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="relative w-full min-w-0 sm:max-w-[520px] sm:flex-1">
-                  <Search
-                    size={16}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8EA3C0]"
-                  />
-                  <input
-                    type="search"
-                    value={cariDesa}
-                    onChange={(event) => setCariDesa(event.target.value)}
-                    placeholder="Cari nama desa, kecamatan, atau kabupaten..."
-                    aria-label="Cari desa"
-                    className="h-10 w-full rounded-md border border-[#B8CCFF] bg-[#E7F0FC] pl-9 pr-3 text-[12px] text-[#34445E] outline-none placeholder:text-[#91A4BF] focus:border-[#3569F6] focus:ring-2 focus:ring-[#3569F6]/10"
-                  />
-                </div>
-
-                <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={bukaModalDesa}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#3569F6] px-3.5 text-[11px] font-semibold text-white transition hover:bg-[#245BD6]"
-                  >
-                    <Plus size={15} />
-                    Tambah Desa
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setNotice('Pilih berkas pemetaan prodi untuk diimpor.')
-                    }
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#B8CCFF] bg-white px-3.5 text-[11px] font-semibold text-[#245BD6] transition hover:bg-[#EEF4FF]"
-                  >
-                    <Download size={15} />
-                    Import Pemetaan Prodi
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCariDesa('');
-                      setDesaDihapus([]);
-                      setNotice('Daftar desa berhasil dimuat ulang.');
-                    }}
-                    title="Muat ulang daftar desa"
-                    aria-label="Muat ulang daftar desa"
-                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[#B8CCFF] bg-white text-[#8295B0] transition hover:bg-blue-50 hover:text-[#3569F6]"
-                  >
-                    <RefreshCw size={16} />
-                  </button>
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={bukaModalDesa}
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-[#3569F6] px-4 text-[11px] font-semibold text-white transition hover:bg-[#245BD6]"
+              >
+                <Plus size={15} />
+                Tambah Desa
+              </button>
             </section>
 
-            <section className="overflow-hidden rounded-[10px] border border-[#B8CCFF] bg-white shadow-[0_2px_5px_rgba(31,52,80,0.04)]">
+            <section className="overflow-hidden rounded-[10px] border border-[#DCE7F7] bg-white shadow-[0_2px_5px_rgba(31,52,80,0.04)]">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] border-collapse text-left">
                   <thead>
@@ -1197,7 +1174,7 @@ export default function DetailPeriode() {
                       ].map((label) => (
                         <th
                           key={label}
-                          className="px-4 py-4 text-[10px] font-bold uppercase tracking-wide text-[#52627A]"
+                          className="px-3 py-3 text-[9px] font-bold uppercase tracking-wide text-[#52627A]"
                         >
                           {label}
                         </th>
@@ -1228,20 +1205,20 @@ export default function DetailPeriode() {
                           key={desa.id}
                           className="border-b border-[#EDF1F7] last:border-b-0 transition hover:bg-[#F8FAFF]"
                         >
-                          <td className="px-4 py-4">
-                            <p className="text-[11px] font-medium text-[#273750]">
+                          <td className="px-3 py-3.5">
+                            <p className="text-[10px] font-semibold text-[#273750]">
                               {desa.nama ?? desa.namaDesa ?? '-'}
                             </p>
-                            <p className="mt-1 text-[10px] text-[#8492A8]">
+                            <p className="mt-0.5 text-[9px] text-[#71819B]">
                               {[desa.kecamatan, desa.kabupaten]
                                 .filter(Boolean)
                                 .join(', ') || '—'}
                             </p>
                           </td>
-                          <td className="px-4 py-4 text-[11px] text-[#52627A]">
+                          <td className="px-3 py-3.5 text-[10px] text-[#34445E]">
                             {nilai(desa.pembimbing ?? desa.dosenPembimbing)}
                           </td>
-                          <td className="px-4 py-4 text-[11px] text-[#52627A]">
+                          <td className="px-3 py-3.5 text-[10px] text-[#34445E]">
                             {nilai(
                               desa.penguji ??
                                 [desa.penguji1, desa.penguji2]
@@ -1249,17 +1226,17 @@ export default function DetailPeriode() {
                                   .join(', '),
                             )}
                           </td>
-                          <td className="px-4 py-4 text-[11px] text-[#52627A]">
+                          <td className="px-3 py-3.5 text-[10px] text-[#34445E]">
                             {nilai(desa.koordinator ?? desa.koordinatorDesa)}
                           </td>
-                          <td className="px-4 py-4">
+                          <td className="px-3 py-3.5">
                             <span
-                              className={`inline-flex rounded px-2 py-1 text-[9px] font-semibold ${desa.status === 'Aktif Ditugaskan' || desa.status === 'Aktif' ? 'bg-[#E8F7EF] text-[#16805D]' : 'bg-[#FFF4E5] text-[#A85D00]'}`}
+                              className={`inline-flex whitespace-nowrap rounded px-2 py-1 text-[9px] font-semibold ${desa.status === 'Aktif Ditugaskan' || desa.status === 'Aktif' ? 'bg-[#E8F7EF] text-[#16805D]' : 'bg-[#FFF4E5] text-[#A85D00]'}`}
                             >
                               {desa.status ?? 'Belum Ditugaskan'}
                             </span>
                           </td>
-                          <td className="px-4 py-4">
+                          <td className="px-3 py-3.5">
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
@@ -1309,7 +1286,7 @@ export default function DetailPeriode() {
                       <tr>
                         <td
                           colSpan={6}
-                          className="px-5 py-12 text-center text-[12px] text-[#8A99B0]"
+                          className="px-4 py-12 text-center text-[11px] text-[#8492A8]"
                         >
                           {cariDesa.trim()
                             ? 'Tidak ada data desa yang sesuai dengan pencarian.'
@@ -1320,8 +1297,8 @@ export default function DetailPeriode() {
                   </tbody>
                 </table>
               </div>
-              <div className="flex items-center justify-between border-t border-[#EDF1F7] px-5 py-3">
-                <p className="text-[10px] text-[#8A99B0]">
+              <div className="flex items-center justify-between border-t border-[#EDF1F7] px-4 py-3">
+                <p className="text-[10px] text-[#8492A8]">
                   Menampilkan{' '}
                   {
                     daftarDesa.filter((desa) => {
@@ -1351,6 +1328,46 @@ export default function DetailPeriode() {
                 </p>
               </div>
             </section>
+          </div>
+        ) : tabAktif === 'Daftar Peserta' ? (
+          <DaftarPeserta
+            periodeId={periode.id}
+            daftarDesa={daftarDesa
+              .filter((desa) => !desaDihapus.includes(desa.id))
+              .map((desa) => ({
+                id: desa.id,
+                nama: desa.nama ?? desa.namaDesa ?? 'Desa',
+              }))}
+            pendaftaranAwal={detail.pendaftaranAwal}
+            pendaftaranAkhir={detail.pendaftaranAkhir}
+          />
+        ) : tabAktif === 'Daftar Pemonev' ? (
+          <Pemonev periodeId={periode.id} />
+        ) : tabAktif === 'Blog' ? (
+          desaUntukBlog ? (
+            <div className="p-4 sm:p-6">
+              <Blog
+                periodeId={periode.id}
+                desaId={desaUntukBlog.id}
+                namaDesa={
+                  desaUntukBlog.nama ?? desaUntukBlog.namaDesa ?? 'Desa'
+                }
+              />
+            </div>
+          ) : (
+            <div className="flex min-h-[300px] flex-col items-center justify-center p-8 text-center">
+              <Newspaper size={28} className="text-[#A3B3CA]" />
+              <p className="mt-3 text-sm font-semibold text-[#52627A]">
+                Belum ada data desa
+              </p>
+              <p className="mt-1 text-xs text-[#8492A8]">
+                Tambahkan desa terlebih dahulu untuk menampilkan blog.
+              </p>
+            </div>
+          )
+        ) : tabAktif === 'SPD dan Surat Tugas Dosen' ? (
+          <div className="p-4 sm:p-6">
+            <SuratTugas />
           </div>
         ) : (
           <div className="flex min-h-[300px] flex-col items-center justify-center p-8 text-center sm:p-12">

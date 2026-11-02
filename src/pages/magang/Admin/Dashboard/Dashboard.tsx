@@ -39,7 +39,7 @@ function StatCard({
     <button
       type="button"
       onClick={() => navigate(to)}
-      className="group min-w-0 rounded-xl border border-[#B8CCFF] bg-white p-4 text-left shadow-[0_2px_5px_rgba(31,52,80,0.03)] transition hover:-translate-y-0.5 hover:border-[#3569F6] hover:shadow-md sm:p-5"
+      className="group min-w-0 rounded-xl cursor-pointer border border-[#B8CCFF] bg-white p-4 text-left shadow-[0_2px_5px_rgba(31,52,80,0.03)] transition hover:-translate-y-0.5 hover:border-[#3569F6] hover:shadow-md sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -133,7 +133,7 @@ export default function Dashboard() {
     .slice(0, 5);
 
   const progressCardClass =
-    'flex items-center gap-3 rounded-xl border border-[#B8CCFF] bg-white p-4 text-left transition hover:border-[#3569F6] hover:shadow-sm';
+    'flex items-center gap-3 cursor-pointer rounded-xl border border-[#B8CCFF] bg-white p-4 text-left transition hover:border-[#3569F6] hover:shadow-sm';
 
   return (
     <div className="min-h-full bg-[#F4F7FC] p-4 sm:p-6 lg:p-7">

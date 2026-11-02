@@ -176,15 +176,6 @@ export default function PeriodeKKN() {
         </section>
 
         <section className="overflow-hidden rounded-[10px] border border-[#B8CCFF] bg-white shadow-sm">
-          <div className="border-b border-[#EDF1F7] px-5 py-4">
-            <h2 className="text-[13px] font-bold text-[#172943]">
-              Daftar Periode KKN
-            </h2>
-            <p className="mt-1 text-[11px] text-[#71819B]">
-              Total {data.length} periode terdaftar
-            </p>
-          </div>
-
           <div className="overflow-x-auto">
             <table className="w-full min-w-[780px] border-collapse text-left">
               <thead>
