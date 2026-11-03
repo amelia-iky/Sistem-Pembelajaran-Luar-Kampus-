@@ -52,6 +52,16 @@ export default function Login() {
       return;
     }
 
+    // LOGIN ADMIN ASISTENSI MENGAJAR
+    if (normalizedEmail === 'adminam@undiksha.ac.id' && password === 'am123') {
+      sessionStorage.setItem('user-role', 'admin');
+      sessionStorage.setItem('user-email', normalizedEmail);
+      sessionStorage.setItem('admin-program', 'am');
+
+      navigate('/admin/am/dashboard');
+      return;
+    }
+
     setError('Username atau password yang Anda masukkan salah.');
   };
 
@@ -160,7 +170,6 @@ export default function Login() {
               Silakan masukkan kredensial Anda
             </p>
 
-            {/* PESAN ERROR */}
             {error && (
               <div
                 role="alert"
@@ -304,7 +313,6 @@ export default function Login() {
               </button>
             </form>
 
-            {/* LOGO BLE */}
             <div className="mt-7 flex justify-center">
               <img
                 src="/logo-BLE.png"

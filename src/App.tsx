@@ -19,6 +19,7 @@ import Login from './pages/Login/Login';
 // ======================================================
 // MAHASISWA - MAGANG
 // ======================================================
+
 import DashboardMagangMahasiswa from './pages/magang/mahasiswa/Dashboard/Dashboard';
 import TempatMagangMahasiswa from './pages/magang/mahasiswa/TempatMagang/TempatMagang';
 import PendampingMagang from './pages/magang/mahasiswa/PendampingMagang/PendampingMagang';
@@ -28,6 +29,7 @@ import JurnalMagang from './pages/magang/mahasiswa/Jurnal/JurnalMagang';
 // ======================================================
 // MAHASISWA - KKN
 // ======================================================
+
 import DashboardKKNMahasiswa from './pages/KKN/mahasiswa/DashboardKKN/Dashboard';
 import TempatKKN from './pages/KKN/mahasiswa/TempatKKN/TempatKKN';
 import PendampingKKN from './pages/KKN/mahasiswa/PendampingKKN/PendampingKKN';
@@ -39,6 +41,7 @@ import PenilaianKKN from './pages/KKN/mahasiswa/PenilaianKKN/PenilaianKKN';
 // ======================================================
 // MAHASISWA - ASISTENSI MENGAJAR
 // ======================================================
+
 import DashboardAMMahasiswa from './pages/AM/mahasiswa/DashboardAM/DashboardAM';
 import TempatAM from './pages/AM/mahasiswa/TempatAM/TempatAM';
 import PendampingAM from './pages/AM/mahasiswa/PendampingAM/PendampingAM';
@@ -51,12 +54,14 @@ import RuangKolaboratifAM from './pages/AM/mahasiswa/RuangKolaboratifAM/RuangKol
 // ======================================================
 // HALAMAN UMUM MAHASISWA
 // ======================================================
+
 import PendaftaranProgram from './pages/PendaftaranProgram/PendaftaranProgram';
 import Profil from './pages/Profil/Profiuser';
 
 // ======================================================
 // ADMIN - MAGANG
 // ======================================================
+
 import DashboardAdminMagang from './pages/magang/Admin/Dashboard/Dashboard';
 import PeriodeMagangAdmin from './pages/magang/Admin/PeriodeMagang/PeriodeMagang';
 import TempatMagangAdmin from './pages/magang/Admin/TempatMagang/TempatMagang';
@@ -93,6 +98,7 @@ import LogAktivitas from './pages/magang/Admin/LogAktivitas/LogAktivitas';
 // ======================================================
 // ADMIN - KKN
 // ======================================================
+
 import Dashboard from './pages/KKN/Admin/Dashboard/Dashboard';
 import Periode from './pages/KKN/Admin/Periode/Periode';
 import TambahPeriode from './pages/KKN/Admin/Periode/TambahPeriode';
@@ -109,10 +115,29 @@ import BuktiKunjungan from './pages/KKN/Admin/Periode/DetailDesa/BuktiKunjungan'
 import Nilai from './pages/KKN/Admin/Periode/DetailDesa/Nilai';
 
 import type { DesaRouteContext } from './pages/KKN/Admin/Periode/DetailDesa/DesaContext';
+
 import RunningText from './pages/KKN/Admin/RunningText/RunningText';
 import Dosen from './pages/KKN/Admin/Dosen/Dosen';
 import Mahasiswa from './pages/KKN/Admin/Mahasiswa/Mahasiswa';
 import Pengguna from './pages/KKN/Admin/Pengguna/Pengguna';
+import Kabupaten from './pages/KKN/Admin/Lokasi/Kabupaten';
+import Kecamatan from './pages/KKN/Admin/Lokasi/Kecamatan';
+import DesaKelurahan from './pages/KKN/Admin/Lokasi/DesaKelurahan';
+
+// ======================================================
+// ADMIN - ASISTENSI MENGAJAR
+// ======================================================
+
+import UserAM from './pages/AM/Admin/User/User';
+import AdminUser from './pages/AM/Admin/User/Admin';
+import MahasiswaAM from './pages/AM/Admin/User/Mahasisswa';
+import DosenAM from './pages/AM/Admin/User/Dossen';
+import GuruAM from './pages/AM/Admin/User/Guru';
+
+import MasterData from './pages/AM/Admin/MasterData/Masterdataa';
+import Fakultas from './pages/AM/Admin/MasterData/Fakultas';
+import Jurusan from './pages/AM/Admin/MasterData/Jurusan';
+import Prodi from './pages/AM/Admin/MasterData/Prodi';
 
 // ======================================================
 // ROUTE PENDUKUNG HALAMAN DESA KKN
@@ -191,10 +216,14 @@ function NilaiRoute() {
 }
 
 // ======================================================
-// LAYOUT ADMIN MAGANG
+// LAYOUT ADMIN
 // ======================================================
 
-function AdminMagangLayout() {
+type AdminLayoutProps = {
+  program: 'magang' | 'kkn' | 'am';
+};
+
+function AdminLayout({ program }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -213,7 +242,7 @@ function AdminMagangLayout() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <SidebarAdmin isOpen={sidebarOpen} program="magang" />
+        <SidebarAdmin isOpen={sidebarOpen} program={program} />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -229,41 +258,32 @@ function AdminMagangLayout() {
   );
 }
 
-// ======================================================
-// LAYOUT ADMIN KKN
-// ======================================================
+function AdminMagangLayout() {
+  return <AdminLayout program="magang" />;
+}
 
 function AdminKKNLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  return <AdminLayout program="kkn" />;
+}
 
+function AdminAMLayout() {
+  return <AdminLayout program="am" />;
+}
+
+// ======================================================
+// HALAMAN SEMENTARA ADMIN AM
+// ======================================================
+
+function AMPagePlaceholder() {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC]">
-      {sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Tutup sidebar"
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-20 cursor-default bg-slate-900/50 lg:hidden"
-        />
-      )}
+    <div className="rounded-xl border border-[#E2E8F0] bg-white p-8">
+      <h1 className="text-lg font-semibold text-[#093060]">
+        Halaman Asistensi Mengajar
+      </h1>
 
-      <div
-        className={`fixed inset-y-0 left-0 z-30 w-[245px] shrink-0 overflow-hidden transition-transform duration-300 lg:relative lg:inset-auto lg:z-auto lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <SidebarAdmin isOpen={sidebarOpen} program="kkn" />
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
-
-        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 sm:py-8">
-          <div className="mx-auto max-w-[1500px]">
-            <Outlet />
-          </div>
-        </main>
-      </div>
+      <p className="mt-2 text-sm text-slate-500">
+        Halaman ini belum dihubungkan dengan komponen frontend.
+      </p>
     </div>
   );
 }
@@ -279,35 +299,37 @@ function AppContent() {
   const adminProgram = sessionStorage.getItem('admin-program');
   const path = location.pathname.toLowerCase();
 
-  // ----------------------------------------------------
+  const isAdminProgramValid =
+    adminProgram === 'magang' ||
+    adminProgram === 'kkn' ||
+    adminProgram === 'am';
+
+  const adminDashboard =
+    adminProgram === 'kkn'
+      ? '/admin/kkn/dashboard'
+      : adminProgram === 'am'
+        ? '/admin/am/dashboard'
+        : '/admin/magang/dashboard';
+
+  // ====================================================
   // LOGIN DAN HALAMAN AWAL
-  // ----------------------------------------------------
+  // ====================================================
 
   if (path === '/' || path === '/login') {
     if (userRole === 'mahasiswa') {
       return <Navigate to="/pendaftaran-program" replace />;
     }
 
-    if (userRole === 'admin') {
-      if (adminProgram === 'kkn') {
-        return <Navigate to="/admin/kkn/dashboard" replace />;
-      }
-
-      if (adminProgram === 'magang') {
-        return <Navigate to="/admin/magang/dashboard" replace />;
-      }
-
-      sessionStorage.removeItem('user-role');
-      sessionStorage.removeItem('user-email');
-      sessionStorage.removeItem('admin-program');
+    if (userRole === 'admin' && isAdminProgramValid) {
+      return <Navigate to={adminDashboard} replace />;
     }
 
     return <Login />;
   }
 
-  // ----------------------------------------------------
+  // ====================================================
   // PENDAFTARAN PROGRAM MAHASISWA
-  // ----------------------------------------------------
+  // ====================================================
 
   if (path === '/pendaftaran-program') {
     return userRole === 'mahasiswa' ? (
@@ -315,9 +337,9 @@ function AppContent() {
     ) : (
       <Navigate
         to={
-          adminProgram === 'kkn'
-            ? '/admin/kkn/dashboard'
-            : '/admin/magang/dashboard'
+          userRole === 'admin' && isAdminProgramValid
+            ? adminDashboard
+            : '/login'
         }
         replace
       />
@@ -330,23 +352,28 @@ function AppContent() {
 
   if (path.startsWith('/admin')) {
     if (userRole !== 'admin') {
-      return <Navigate to="/pendaftaran-program" replace />;
+      return <Navigate to="/login" replace />;
+    }
+
+    if (!isAdminProgramValid) {
+      sessionStorage.removeItem('user-role');
+      sessionStorage.removeItem('user-email');
+      sessionStorage.removeItem('admin-program');
+
+      return <Navigate to="/login" replace />;
+    }
+
+    // Admin hanya boleh mengakses programnya sendiri.
+    if (adminProgram === 'magang' && !path.startsWith('/admin/magang')) {
+      return <Navigate to="/admin/magang/dashboard" replace />;
     }
 
     if (adminProgram === 'kkn' && !path.startsWith('/admin/kkn')) {
       return <Navigate to="/admin/kkn/dashboard" replace />;
     }
 
-    if (adminProgram === 'magang' && !path.startsWith('/admin/magang')) {
-      return <Navigate to="/admin/magang/dashboard" replace />;
-    }
-
-    if (adminProgram !== 'magang' && adminProgram !== 'kkn') {
-      sessionStorage.removeItem('user-role');
-      sessionStorage.removeItem('user-email');
-      sessionStorage.removeItem('admin-program');
-
-      return <Navigate to="/login" replace />;
+    if (adminProgram === 'am' && !path.startsWith('/admin/am')) {
+      return <Navigate to="/admin/am/dashboard" replace />;
     }
 
     return (
@@ -361,27 +388,22 @@ function AppContent() {
             element={<Navigate to="/admin/magang/dashboard" replace />}
           />
 
-          {/* Dashboard dan Periode */}
           <Route path="dashboard" element={<DashboardAdminMagang />} />
           <Route path="periode" element={<PeriodeMagangAdmin />} />
 
-          {/* Manajemen Magang */}
           <Route path="tempat-magang" element={<TempatMagangAdmin />} />
           <Route path="manajemen" element={<ManajemenMagangAdmin />} />
           <Route path="set-mahasiswa" element={<SetMahasiswa />} />
 
-          {/* Penilaian, SPD, dan Pengumuman */}
           <Route path="penilaian" element={<PenilaianMagangAdmin />} />
           <Route path="spd" element={<SPDMagangAdmin />} />
           <Route path="pengumuman" element={<PengumumanMagangAdmin />} />
 
-          {/* Master Data */}
           <Route path="data-user" element={<DataUser />} />
           <Route path="data-dosen" element={<DataDosen />} />
           <Route path="data-mahasiswa" element={<DataMahasiswa />} />
           <Route path="data-mentor" element={<DataMentor />} />
 
-          {/* Master Data Instrumen */}
           <Route path="data-instrumen-nilai/penguji" element={<Penguji />} />
           <Route
             path="data-instrumen-nilai/pemonitor"
@@ -393,30 +415,24 @@ function AppContent() {
             element={<Pembimbing />}
           />
 
-          {/* Data Fakultas, Jurusan, dan Prodi */}
           <Route path="data-fakultas" element={<DataFakultas />} />
           <Route path="data-jurusan" element={<DataJurusan />} />
           <Route path="data-prodi" element={<DataProdi />} />
 
-          {/* Surat */}
           <Route path="surat" element={<Surat />} />
 
-          {/* Jurnal Harian */}
           <Route path="jurnal-harian" element={<JurnalHarian />} />
           <Route path="jurnal-harian/:nim" element={<DetailJurnal />} />
 
-          {/* Logbook Bimbingan */}
           <Route path="logbook-bimbingan" element={<LogbookBimbingan />} />
           <Route
             path="logbook-bimbingan/:nim"
             element={<DetailLogbookBimbingan />}
           />
 
-          {/* Pengaturan dan Log Aktivitas */}
           <Route path="pengaturan" element={<Pengaturan />} />
           <Route path="log-aktivitas" element={<LogAktivitas />} />
 
-          {/* Halaman Tidak Ditemukan */}
           <Route
             path="*"
             element={<Navigate to="/admin/magang/dashboard" replace />}
@@ -433,18 +449,21 @@ function AppContent() {
             element={<Navigate to="/admin/kkn/dashboard" replace />}
           />
 
-          {/* Dashboard dan Periode */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="periode" element={<Periode />} />
           <Route path="periode/tambah" element={<TambahPeriode />} />
           <Route path="periode/:id" element={<DetailPeriode />} />
+
           <Route path="pengumuman" element={<PengumumanKKN />} />
           <Route path="running-text" element={<RunningText />} />
           <Route path="dosen" element={<Dosen />} />
           <Route path="mahasiswa" element={<Mahasiswa />} />
           <Route path="pengguna" element={<Pengguna />} />
 
-          {/* Detail Desa dan Subhalamannya */}
+          <Route path="lokasi-kkn/kabupaten" element={<Kabupaten />} />
+          <Route path="lokasi-kkn/kecamatan" element={<Kecamatan />} />
+          <Route path="lokasi-kkn/desa" element={<DesaKelurahan />} />
+
           <Route path="periode/:id/desa/:desaId" element={<LayoutDesa />}>
             <Route index element={<DetailDesa />} />
             <Route path="pemetaan-prodi" element={<PemetaanProdiRoute />} />
@@ -458,62 +477,104 @@ function AppContent() {
             <Route path="nilai" element={<NilaiRoute />} />
           </Route>
 
-          {/* Halaman Tidak Ditemukan */}
           <Route
             path="*"
             element={<Navigate to="/admin/kkn/dashboard" replace />}
           />
         </Route>
 
-        {/* Redirect Route Admin */}
+        {/* ============================================== */}
+        {/* ADMIN ASISTENSI MENGAJAR */}
+        {/* ============================================== */}
+
+        <Route path="/admin/am" element={<AdminAMLayout />}>
+          <Route
+            index
+            element={<Navigate to="/admin/am/dashboard" replace />}
+          />
+
+          <Route path="dashboard" element={<Dashboard />} />
+
+          {/* MASTER DATA USER */}
+          <Route path="user" element={<UserAM />}>
+            <Route index element={<Navigate to="admin" replace />} />
+            <Route path="admin" element={<AdminUser />} />
+            <Route path="mahasiswa" element={<MahasiswaAM />} />
+            <Route path="dosen" element={<DosenAM />} />
+            <Route path="guru" element={<GuruAM />} />
+          </Route>
+
+          {/* MASTER DATA */}
+          <Route path="master-data" element={<MasterData />}>
+            <Route index element={<Navigate to="fakultas" replace />} />
+            <Route path="fakultas" element={<Fakultas />} />
+            <Route path="jurusan" element={<Jurusan />} />
+            <Route path="prodi" element={<Prodi />} />
+          </Route>
+
+          {/* DATA SEKOLAH */}
+          <Route path="kabupaten" element={<AMPagePlaceholder />} />
+          <Route path="kecamatan" element={<AMPagePlaceholder />} />
+          <Route path="sekolah" element={<AMPagePlaceholder />} />
+
+          {/* HALAMAN UMUM AM */}
+          <Route path="pengumuman" element={<AMPagePlaceholder />} />
+          <Route path="log-aktivitas" element={<AMPagePlaceholder />} />
+
+          {/* PPL DALAM NEGERI */}
+          <Route
+            path="ppl-dalam-negeri/jenis-asistensi"
+            element={<AMPagePlaceholder />}
+          />
+          <Route
+            path="ppl-dalam-negeri/prasyarat"
+            element={<AMPagePlaceholder />}
+          />
+          <Route
+            path="ppl-dalam-negeri/jenis-berkas"
+            element={<AMPagePlaceholder />}
+          />
+          <Route path="ppl-dalam-negeri/spd" element={<AMPagePlaceholder />} />
+          <Route
+            path="ppl-dalam-negeri/periode"
+            element={<AMPagePlaceholder />}
+          />
+          <Route
+            path="ppl-dalam-negeri/pemetaan-sekolah"
+            element={<AMPagePlaceholder />}
+          />
+          <Route
+            path="ppl-dalam-negeri/instrumen-penilaian"
+            element={<AMPagePlaceholder />}
+          />
+
+          <Route
+            path="*"
+            element={<Navigate to="/admin/am/dashboard" replace />}
+          />
+        </Route>
+
+        {/* REDIRECT ADMIN */}
+        {/* ============================================== */}
+
         <Route
           path="/admin"
-          element={
-            <Navigate
-              to={
-                adminProgram === 'kkn'
-                  ? '/admin/kkn/dashboard'
-                  : '/admin/magang/dashboard'
-              }
-              replace
-            />
-          }
+          element={<Navigate to={adminDashboard} replace />}
         />
 
         <Route
           path="/admin/dashboard"
-          element={
-            <Navigate
-              to={
-                adminProgram === 'kkn'
-                  ? '/admin/kkn/dashboard'
-                  : '/admin/magang/dashboard'
-              }
-              replace
-            />
-          }
+          element={<Navigate to={adminDashboard} replace />}
         />
 
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to={
-                adminProgram === 'kkn'
-                  ? '/admin/kkn/dashboard'
-                  : '/admin/magang/dashboard'
-              }
-              replace
-            />
-          }
-        />
+        <Route path="*" element={<Navigate to={adminDashboard} replace />} />
       </Routes>
     );
   }
 
-  // ----------------------------------------------------
+  // ====================================================
   // ADMIN TIDAK BOLEH MENGAKSES HALAMAN MAHASISWA
-  // ----------------------------------------------------
+  // ====================================================
 
   if (
     userRole === 'admin' &&
@@ -522,16 +583,7 @@ function AppContent() {
       path.startsWith('/am/') ||
       path === '/profil')
   ) {
-    return (
-      <Navigate
-        to={
-          adminProgram === 'kkn'
-            ? '/admin/kkn/dashboard'
-            : '/admin/magang/dashboard'
-        }
-        replace
-      />
-    );
+    return <Navigate to={adminDashboard} replace />;
   }
 
   if (userRole !== 'mahasiswa') {
@@ -667,7 +719,6 @@ function AppContent() {
 
               <Route path="/profil" element={<Profil />} />
 
-              {/* Halaman Tidak Ditemukan */}
               <Route
                 path="*"
                 element={
